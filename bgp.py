@@ -107,6 +107,7 @@ def main():
     for router in net.switches:
         router.cmd("sysctl -w net.ipv4.ip_forward=1")
         router.waitOutput()
+    log("Waiting for sysctl changes to take effect...")
     sleep(3)
     for router in net.switches:
         router.cmd("/usr/lib/quagga/zebra -f conf/zebra-%s.conf -d -i /tmp/zebra-%s.pid > logs/%s-zebra-stdout 2>&1" % (router.name, router.name, router.name))
