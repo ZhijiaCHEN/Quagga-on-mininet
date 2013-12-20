@@ -76,7 +76,7 @@ class SimpleTopo(Topo):
             log("Adding rogue AS4", "magenta")
             routers.append(self.addSwitch('R4'))
             for j in xrange(num_hosts_per_as):
-                hostname = 'h%d-%d' % (4, j)
+                hostname = 'h%d-%d' % (4, j+1)
                 host = self.addNode(hostname)
                 hosts.append(host)
                 self.addLink('R4', hostname)
@@ -89,7 +89,7 @@ def getIP(hostname):
     AS = int(AS)
     if AS == 4:
         AS = 3
-    ip = '%s.0.%s.1' % (10+AS, idx)
+    ip = '%s.0.%s.1/24' % (10+AS, idx)
     return ip
 
 def getGateway(hostname):
@@ -97,18 +97,24 @@ def getGateway(hostname):
     AS = int(AS)
     if AS == 4:
         AS = 3
-    gw = '%s.0.%s.0' % (10+AS, idx)
+    gw = '%s.0.%s.254' % (10+AS, idx)
     return gw
 
+def startWebserver(net, hostname, text="Default web server"):
+    host = net.getNodeByName(hostname)
+    return host.popen("python webserver.py --text '%s'" % text, shell=True)
+
 def main():
-    os.system("rm -f logs/R*.log /tmp/R*.pid logs/*stdout*")
+    os.system("rm -f /tmp/R*.log /tmp/R*.pid logs/*")
     net = Mininet(topo=SimpleTopo(), switch=Router)
     net.start()
     for router in net.switches:
         router.cmd("sysctl -w net.ipv4.ip_forward=1")
         router.waitOutput()
+
     log("Waiting for sysctl changes to take effect...")
     sleep(3)
+
     for router in net.switches:
         router.cmd("/usr/lib/quagga/zebra -f conf/zebra-%s.conf -d -i /tmp/zebra-%s.pid > logs/%s-zebra-stdout 2>&1" % (router.name, router.name, router.name))
         router.waitOutput()
@@ -120,9 +126,15 @@ def main():
         host.cmd("ifconfig %s-eth0 %s" % (host.name, getIP(host.name)))
         host.cmd("route add default gw %s" % (getGateway(host.name)))
 
+    log("Starting web servers", 'yellow')
+    startWebserver(net, 'h3-1', "Default web server")
+    if FLAGS_rogue_as:
+        startWebserver(net, 'h4-1', "Attacker web server")
+
     CLI(net)
     net.stop()
     os.system("killall -9 zebra bgpd")
+    os.system('pgrep -f webserver.py | xargs kill -9')
 
 if __name__ == "__main__":
     main()
