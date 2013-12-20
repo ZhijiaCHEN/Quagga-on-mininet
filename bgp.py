@@ -101,7 +101,7 @@ def getGateway(hostname):
     return gw
 
 def main():
-    os.system("rm -f /tmp/R*.log /tmp/R*.pid /tmp/*stdout*")
+    os.system("rm -f logs/R*.log /tmp/R*.pid logs/*stdout*")
     net = Mininet(topo=SimpleTopo(), switch=Router)
     net.start()
     for router in net.switches:
@@ -109,9 +109,9 @@ def main():
         router.waitOutput()
     sleep(3)
     for router in net.switches:
-        router.cmd("/usr/lib/quagga/zebra -f zebra-%s.conf -d -i /tmp/zebra-%s.pid > /tmp/%s-zebra-stdout 2>&1" % (router.name, router.name, router.name))
+        router.cmd("/usr/lib/quagga/zebra -f conf/zebra-%s.conf -d -i /tmp/zebra-%s.pid > logs/%s-zebra-stdout 2>&1" % (router.name, router.name, router.name))
         router.waitOutput()
-        router.cmd("/usr/lib/quagga/bgpd -f bgpd-%s.conf -d -i /tmp/bgp-%s.pid > /tmp/%s-bgpd-stdout 2>&1" % (router.name, router.name, router.name), shell=True)
+        router.cmd("/usr/lib/quagga/bgpd -f conf/bgpd-%s.conf -d -i /tmp/bgp-%s.pid > logs/%s-bgpd-stdout 2>&1" % (router.name, router.name, router.name), shell=True)
         router.waitOutput()
         log("Starting zebra and bgpd on %s" % router.name)
 
