@@ -25,7 +25,7 @@ parser.add_argument('--sleep', default=3, type=int)
 args = parser.parse_args()
 
 FLAGS_rogue_as = args.rogue
-
+ROGUE_AS_NAME = 'R4'
 
 def log(s, col="green"):
     print T.colored(s, col)
@@ -85,16 +85,19 @@ class SimpleTopo(Topo):
         for i in xrange(num_ases-1):
             self.addLink('R%d' % (i+1), 'R%d' % (i+2))
 
-        if FLAGS_rogue_as:
-            log("Adding rogue AS4", "magenta")
-            routers.append(self.addSwitch('R4'))
-            for j in xrange(num_hosts_per_as):
-                hostname = 'h%d-%d' % (4, j+1)
-                host = self.addNode(hostname)
-                hosts.append(host)
-                self.addLink('R4', hostname)
-            # This MUST be added at the end
-            self.addLink('R1', 'R4')
+        routers.append(self.addSwitch('R4'))
+        for j in xrange(num_hosts_per_as):
+            hostname = 'h%d-%d' % (4, j+1)
+            host = self.addNode(hostname)
+            hosts.append(host)
+            self.addLink('R4', hostname)
+        # This MUST be added at the end
+        self.addLink('R1', 'R4')
+
+        # Each host is also given another interface to connect to the
+        # root namespace.
+        root = self.addNode('root', inNamespace=False)
+        self.addLink('root', 'h1-1')
         return
 
 
@@ -125,16 +128,20 @@ def startWebserver(net, hostname, text="Default web server"):
 
 def main():
     os.system("rm -f /tmp/R*.log /tmp/R*.pid logs/*")
+    os.system("mn -c >/dev/null 2>&1")
     net = Mininet(topo=SimpleTopo(), switch=Router)
     net.start()
     for router in net.switches:
         router.cmd("sysctl -w net.ipv4.ip_forward=1")
         router.waitOutput()
 
-    log("Waiting for sysctl changes to take effect...")
+    log("Waiting %d seconds for sysctl changes to take effect..."
+        % args.sleep)
     sleep(args.sleep)
 
     for router in net.switches:
+        if router.name == ROGUE_AS_NAME and not FLAGS_rogue_as:
+            continue
         router.cmd("/usr/lib/quagga/zebra -f conf/zebra-%s.conf -d -i /tmp/zebra-%s.pid > logs/%s-zebra-stdout 2>&1" % (router.name, router.name, router.name))
         router.waitOutput()
         router.cmd("/usr/lib/quagga/bgpd -f conf/bgpd-%s.conf -d -i /tmp/bgp-%s.pid > logs/%s-bgpd-stdout 2>&1" % (router.name, router.name, router.name), shell=True)
@@ -147,8 +154,7 @@ def main():
 
     log("Starting web servers", 'yellow')
     startWebserver(net, 'h3-1', "Default web server")
-    if FLAGS_rogue_as:
-        startWebserver(net, 'h4-1', "Attacker web server")
+    startWebserver(net, 'h4-1', "Attacker web server")
 
     CLI(net)
     net.stop()
