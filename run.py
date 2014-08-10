@@ -12,6 +12,7 @@ parser.add_argument('--node',
 parser.add_argument('--list', action="store_true", default=False,
                     help="List all running nodes.")
 parser.add_argument('--cmd', default='ifconfig',
+                    nargs="+",
                     help="Command to run inside node.")
 
 FLAGS = parser.parse_args()
@@ -31,7 +32,7 @@ def list_nodes(do_print=False):
         name = match.group(1)
         pid = line.split()[1]
         if do_print:
-            print "name: %s, pid: %s" % (name, pid)
+            print "name: %6s, pid: %6s" % (name, pid)
         ret[name] = pid
     return ret
 
@@ -51,7 +52,8 @@ def main():
         print "node `%s' not found" % (FLAGS.node)
         sys.exit(1)
 
-    os.system("mnexec -a %s %s" % (pid, FLAGS.cmd))
+    cmd = ' '.join(FLAGS.cmd)
+    os.system("mnexec -a %s %s" % (pid, cmd))
 
 
 if __name__ == '__main__':

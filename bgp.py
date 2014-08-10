@@ -93,11 +93,6 @@ class SimpleTopo(Topo):
             self.addLink('R4', hostname)
         # This MUST be added at the end
         self.addLink('R1', 'R4')
-
-        # Each host is also given another interface to connect to the
-        # root namespace.
-        root = self.addNode('root', inNamespace=False)
-        self.addLink('root', 'h1-1')
         return
 
 
@@ -129,6 +124,9 @@ def startWebserver(net, hostname, text="Default web server"):
 def main():
     os.system("rm -f /tmp/R*.log /tmp/R*.pid logs/*")
     os.system("mn -c >/dev/null 2>&1")
+    os.system("killall -9 zebra bgpd > /dev/null 2>&1")
+    os.system('pgrep -f webserver.py | xargs kill -9')
+
     net = Mininet(topo=SimpleTopo(), switch=Router)
     net.start()
     for router in net.switches:
@@ -154,7 +152,7 @@ def main():
 
     log("Starting web servers", 'yellow')
     startWebserver(net, 'h3-1', "Default web server")
-    startWebserver(net, 'h4-1', "Attacker web server")
+    startWebserver(net, 'h4-1', "*** Attacker web server ***")
 
     CLI(net)
     net.stop()
