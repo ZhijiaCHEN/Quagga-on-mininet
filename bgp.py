@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 
 from mininet.topo import Topo
 from mininet.net import Mininet
@@ -20,14 +21,21 @@ setLogLevel('info')
 
 parser = ArgumentParser("Configure simple BGP network in Mininet.")
 parser.add_argument('--rogue', action="store_true", default=False)
+parser.add_argument('--sleep', default=3, type=int)
 args = parser.parse_args()
 
 FLAGS_rogue_as = args.rogue
 
+
 def log(s, col="green"):
     print T.colored(s, col)
 
+
 class Router(Switch):
+    """Defines a new router that is inside a network namespace so that the
+    individual routing entries don't collide.
+
+    """
     ID = 0
     def __init__(self, name, **kwargs):
         kwargs['inNamespace'] = True
@@ -48,7 +56,12 @@ class Router(Switch):
     def log(self, s, col="magenta"):
         print T.colored(s, col)
 
+
 class SimpleTopo(Topo):
+    """The Autonomous System topology is a simple straight-line topology
+    between AS1 -- AS2 -- AS3.  The rogue AS (AS4) connects to AS1 directly.
+
+    """
     def __init__(self):
         # Add default members to class.
         super(SimpleTopo, self ).__init__()
@@ -84,6 +97,7 @@ class SimpleTopo(Topo):
             self.addLink('R1', 'R4')
         return
 
+
 def getIP(hostname):
     AS, idx = hostname.replace('h', '').split('-')
     AS = int(AS)
@@ -92,17 +106,22 @@ def getIP(hostname):
     ip = '%s.0.%s.1/24' % (10+AS, idx)
     return ip
 
+
 def getGateway(hostname):
     AS, idx = hostname.replace('h', '').split('-')
     AS = int(AS)
+    # This condition gives AS4 the same IP range as AS3 so it can be an
+    # attacker.
     if AS == 4:
         AS = 3
     gw = '%s.0.%s.254' % (10+AS, idx)
     return gw
 
+
 def startWebserver(net, hostname, text="Default web server"):
     host = net.getNodeByName(hostname)
     return host.popen("python webserver.py --text '%s'" % text, shell=True)
+
 
 def main():
     os.system("rm -f /tmp/R*.log /tmp/R*.pid logs/*")
@@ -113,7 +132,7 @@ def main():
         router.waitOutput()
 
     log("Waiting for sysctl changes to take effect...")
-    sleep(3)
+    sleep(args.sleep)
 
     for router in net.switches:
         router.cmd("/usr/lib/quagga/zebra -f conf/zebra-%s.conf -d -i /tmp/zebra-%s.pid > logs/%s-zebra-stdout 2>&1" % (router.name, router.name, router.name))
@@ -135,6 +154,7 @@ def main():
     net.stop()
     os.system("killall -9 zebra bgpd")
     os.system('pgrep -f webserver.py | xargs kill -9')
+
 
 if __name__ == "__main__":
     main()
