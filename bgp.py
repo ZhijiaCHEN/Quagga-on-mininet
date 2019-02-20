@@ -27,6 +27,7 @@ args = parser.parse_args()
 FLAGS_rogue_as = args.rogue
 ROGUE_AS_NAME = 'R4'
 
+
 def log(s, col="green"):
     print T.colored(s, col)
 
@@ -37,6 +38,7 @@ class Router(Switch):
 
     """
     ID = 0
+
     def __init__(self, name, **kwargs):
         kwargs['inNamespace'] = True
         Switch.__init__(self, name, **kwargs)
@@ -62,22 +64,23 @@ class SimpleTopo(Topo):
     between AS1 -- AS2 -- AS3.  The rogue AS (AS4) connects to AS1 directly.
 
     """
+
     def __init__(self):
         # Add default members to class.
-        super(SimpleTopo, self ).__init__()
+        super(SimpleTopo, self).__init__()
         num_hosts_per_as = 3
         num_ases = 3
         num_hosts = num_hosts_per_as * num_ases
         # The topology has one router per AS
-	routers = []
+        routers = []
         for i in xrange(num_ases):
             router = self.addSwitch('R%d' % (i+1))
-	    routers.append(router)
+            routers.append(router)
         hosts = []
         for i in xrange(num_ases):
             router = 'R%d' % (i+1)
             for j in xrange(num_hosts_per_as):
-                hostname = 'h%d-%d' % (i+1, j+1)
+                hostname = 'h%d_%d' % (i+1, j+1)
                 host = self.addNode(hostname)
                 hosts.append(host)
                 self.addLink(router, host)
@@ -87,7 +90,7 @@ class SimpleTopo(Topo):
 
         routers.append(self.addSwitch('R4'))
         for j in xrange(num_hosts_per_as):
-            hostname = 'h%d-%d' % (4, j+1)
+            hostname = 'h%d_%d' % (4, j+1)
             host = self.addNode(hostname)
             hosts.append(host)
             self.addLink('R4', hostname)
@@ -97,7 +100,7 @@ class SimpleTopo(Topo):
 
 
 def getIP(hostname):
-    AS, idx = hostname.replace('h', '').split('-')
+    AS, idx = hostname.replace('h', '').split('_')
     AS = int(AS)
     if AS == 4:
         AS = 3
@@ -106,7 +109,7 @@ def getIP(hostname):
 
 
 def getGateway(hostname):
-    AS, idx = hostname.replace('h', '').split('-')
+    AS, idx = hostname.replace('h', '').split('_')
     AS = int(AS)
     # This condition gives AS4 the same IP range as AS3 so it can be an
     # attacker.
@@ -140,9 +143,9 @@ def main():
     for router in net.switches:
         if router.name == ROGUE_AS_NAME and not FLAGS_rogue_as:
             continue
-        router.cmd("/usr/lib/quagga/zebra -f conf/zebra-%s.conf -d -i /tmp/zebra-%s.pid > logs/%s-zebra-stdout 2>&1" % (router.name, router.name, router.name))
+        router.cmd("/usr/sbin/zebra -f conf.backup/zebra-%s.conf -d -i /tmp/zebra-%s.pid > logs/%s-zebra-stdout 2>&1" % (router.name, router.name, router.name))
         router.waitOutput()
-        router.cmd("/usr/lib/quagga/bgpd -f conf/bgpd-%s.conf -d -i /tmp/bgp-%s.pid > logs/%s-bgpd-stdout 2>&1" % (router.name, router.name, router.name), shell=True)
+        router.cmd("/usr/sbin/bgpd -f conf.backup/bgpd-%s.conf -d -i /tmp/bgp-%s.pid > logs/%s-bgpd-stdout 2>&1" % (router.name, router.name, router.name), shell=True)
         router.waitOutput()
         log("Starting zebra and bgpd on %s" % router.name)
 
@@ -151,8 +154,8 @@ def main():
         host.cmd("route add default gw %s" % (getGateway(host.name)))
 
     log("Starting web servers", 'yellow')
-    startWebserver(net, 'h3-1', "Default web server")
-    startWebserver(net, 'h4-1', "*** Attacker web server ***")
+    startWebserver(net, 'h3_1', "Default web server")
+    startWebserver(net, 'h4_1', "*** Attacker web server ***")
 
     CLI(net)
     net.stop()
