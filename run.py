@@ -16,7 +16,7 @@ parser.add_argument('--cmd', default='ifconfig',
                     help="Command to run inside node.")
 
 FLAGS = parser.parse_args()
-node_pat = re.compile(r'.*bash ... mininet:(.*)')
+node_pat = re.compile(r'.*mininet:(.*)')
 
 
 def list_nodes(do_print=False):
