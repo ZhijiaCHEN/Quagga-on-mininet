@@ -50,15 +50,16 @@ class SimpleTopo(Topo):
     def __init__(self):
         # Add default members to class.
         super(SimpleTopo, self).__init__()
-        BGPspeaker = self.addSwitch('BGPspeaker', dpid='1')  # a node that will announce routes using ExaBGP
-        Quagga = self.addSwitch('Quagga', dpid='2')  # a node running quagga routing suite
-        R = self.addSwitch('R', dpid='3')  # a node with ip_forward enabled
+        BGPspeaker = self.addSwitch('BGPspeaker', dpid='3')  # a node that will announce routes using ExaBGP
+        Quagga1 = self.addSwitch('Quagga1', dpid='1')  # a node running quagga routing suite
+        Quagga2 = self.addSwitch('Quagga2', dpid='2')  # a node running quagga routing suite
         h1 = self.addHost('h1')
         h2 = self.addHost('h2')
-        self.addLink(BGPspeaker, Quagga)
-        self.addLink(Quagga, R)
-        self.addLink(Quagga, h1)
-        self.addLink(R, h2)
+        self.addLink(BGPspeaker, Quagga1)
+        self.addLink(Quagga1, Quagga2)
+        self.addLink(Quagga2, BGPspeaker)
+        self.addLink(Quagga1, h1)
+        self.addLink(Quagga2, h2)
 
 
 def main():
@@ -71,26 +72,24 @@ def main():
         router.cmd("sysctl -w net.ipv4.ip_forward=1")
         router.waitOutput()
 
-    log("Waiting %d seconds for sysctl changes to take effect..."
-        % 3)
+    log("Waiting 3 seconds for sysctl changes to take effect...")
     sleep(3)
 
     # if someone ever gets curious about the interface names, by default, mininet names interfaces of a node with the format "<node name>-eth<n>" where n is the order the interface added, for a host, n starts from 0, for a switch, n starts from 1
     for s in net.switches:
         if s.name == "BGPspeaker":  # configure the BGP speaker
-            s.cmd("ifconfig {}-eth1 10.0.0.1 netmask 255.255.255.0 ".format(s.name))  # this interface connects to the Quagga router
-        elif s.name == "Quagga":  # configure Quagga
-            s.cmd("/usr/sbin/zebra -f conf/zebra-{0}.conf -d -i /tmp/zebra-%s.pid > logs/{0}-zebra-stdout 2>&1".format(s.name))
+            s.cmd("ifconfig {}-eth1 10.0.1.1 netmask 255.255.255.0 ".format(s.name))  # this interface connects to the Quagga router 1
+            s.cmd("ifconfig {}-eth2 10.0.3.2 netmask 255.255.255.0 ".format(s.name))  # this interface connects to the Quagga router 2
+        else:  # configure Quagga
+            s.cmd("/usr/sbin/zebra -f conf/zebra-{0}.conf -d -i /tmp/zebra-{0}.pid > logs/{0}-zebra-stdout 2>&1".format(s.name))
             s.waitOutput()
             s.cmd("/usr/sbin/bgpd -f conf/bgpd-{0}.conf -d -i /tmp/bgp-{0}.pid > logs/{0}-bgpd-stdout 2>&1".format(s.name), shell=True)
             s.waitOutput()
             log("Starting zebra and bgpd on {}".format(s.name))
-        else:  # configure R
-            s.cmd("ifconfig {}-eth2 13.0.0.1 netmask 255.255.255.0 ".format(s.name))  # this interface connects to h2
-            s.cmd("ifconfig {}-eth1 10.0.1.2 netmask 255.255.255.0 ".format(s.name))  # this interface connects to the Quagga router
+
     for host in net.hosts:
-        host.cmd("ifconfig {}-eth0 1{}.0.0.2 netmask 255.255.255.0".format(host.name, int(host.name.split('h')[1])+1))
-        host.cmd("route add default gw 1{}.0.0.1".format(int(host.name.split('h')[1])+1))
+        host.cmd("ifconfig {}-eth0 1{}.0.0.2 netmask 255.255.255.0".format(host.name, int(host.name.split('h')[1])))
+        host.cmd("route add default gw 1{}.0.0.1".format(int(host.name.split('h')[1])))
 
     CLI(net)
     net.stop()
