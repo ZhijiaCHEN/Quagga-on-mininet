@@ -96,7 +96,7 @@ def main():
     os.system("killall -9 zebra bgpd > /dev/null 2>&1")
     os.system('pgrep -f webserver.py | xargs kill -9')
 
-    net = Mininet(topo=SimpleTopo(), switch=Router)
+    net = Mininet(topo=SimpleTopo(), switch=Router, controller=None)
     net.start()
     for router in net.switches:
         router.cmd("sysctl -w net.ipv4.ip_forward=1")
@@ -107,9 +107,9 @@ def main():
     sleep(3)
 
     for router in net.switches:
-        router.cmd("/usr/lib/quagga/zebra -f conf/zebra-%s.conf -d -i /tmp/zebra-%s.pid > logs/%s-zebra-stdout 2>&1" % (router.name, router.name, router.name))
+        router.cmd("/usr/sbin/zebra -f conf/zebra-%s.conf -d -i /tmp/zebra-%s.pid > logs/%s-zebra-stdout 2>&1" % (router.name, router.name, router.name))
         router.waitOutput()
-        router.cmd("/usr/lib/quagga/bgpd -f conf/bgpd-%s.conf -d -i /tmp/bgp-%s.pid > logs/%s-bgpd-stdout 2>&1" % (router.name, router.name, router.name), shell=True)
+        router.cmd("/usr/sbin/bgpd -f conf/bgpd-%s.conf -d -i /tmp/bgp-%s.pid > logs/%s-bgpd-stdout 2>&1" % (router.name, router.name, router.name), shell=True)
         router.waitOutput()
         log("Starting zebra and bgpd on %s" % router.name)
 
