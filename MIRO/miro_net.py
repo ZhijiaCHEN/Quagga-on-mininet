@@ -183,6 +183,8 @@ def main():
     sleep(3)
 
     for router in net.switches:
+        if router.name == "R5_2":
+            continue  # we will start R5_2 manually later
         router.cmd("/usr/sbin/zebra -f conf/{0}-zebra.conf -d -i /tmp/{0}-zebra.pid > log/{0}-zebra.log 2>&1".format(router.name), shell=True)
         router.waitOutput()
         router.cmd("/usr/sbin/bgpd -f conf/{0}-bgpd.conf -d -i /tmp/{0}-bgp.pid > log/{0}-bgpd.log 2>&1".format(router.name), shell=True)
