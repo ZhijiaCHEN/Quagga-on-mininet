@@ -137,7 +137,7 @@ enable password en
 {}
 
 !
-log stdout
+log file /tmp/{}-zebra.log
 """
 
     for router in topo.routers:
@@ -145,7 +145,7 @@ log stdout
         for intf in topo.intfDict[router]:
             intfConfStr += "interface {}\n  ip address {}\n".format(intf, getIntfIP(intf))
         f = open("conf/{}-zebra.conf".format(router), 'w')
-        f.write(confTemplate.format(intfConfStr))
+        f.write(confTemplate.format(intfConfStr, rout))
         f.close()
 
 
@@ -163,7 +163,7 @@ def genBgpdConf(topo):
             nAS = int(nIntf.split('-')[0].replace("R", "").split("_")[0])
             nIP = getIntfIP(nIntf).split('/')[0]
             f.write("  neighbor {0} remote-as {1}\n  neighbor {0} next-hop-self\n  neighbor {0} timers 5 5\n".format(nIP, nAS))
-        f.write("debug bgp as4\ndebug bgp events\ndebug bgp filters\ndebug bgp fsm\ndebug bgp keepalives\ndebug bgp updates\n!\nlog stdout\n\n")
+        f.write("debug bgp as4\ndebug bgp events\ndebug bgp filters\ndebug bgp fsm\ndebug bgp keepalives\ndebug bgp updates\n!\nlog file /tmp/{}-bgpd.log\n\n".format(router))
         f.close()
 
 
