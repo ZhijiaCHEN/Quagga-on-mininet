@@ -155,7 +155,7 @@ def genBgpdConf(topo):
         AS = int(AS)
         idx = int(idx)
         f = open("conf/{}-bgpd.conf".format(router), 'w')
-        f.write("! -*- bgp -*-\nhostname {0}\npassword en\nenable password en\n\nrouter bgp {1}\n  bgp router-id {2}.0.0.1\n  network {2}.{3}.0.0/16\n".format(router, AS, AS+100, idx))
+        f.write("! -*- bgp -*-\nhostname {0}\npassword en\nenable password en\n\nrouter bgp {1}\n  bgp router-id {2}.0.0.1\n  network {2}.{3}.0.0/16\n  redistribute connected\n  redistribute kernel\n".format(router, AS, AS+100, idx))
         for intf in topo.intfDict[router]:
             if intf not in topo.linkEndDict:
                 continue
