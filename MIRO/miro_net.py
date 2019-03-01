@@ -145,7 +145,7 @@ log file /tmp/{}-zebra.log
         for intf in topo.intfDict[router]:
             intfConfStr += "interface {}\n  ip address {}\n".format(intf, getIntfIP(intf))
         f = open("conf/{}-zebra.conf".format(router), 'w')
-        f.write(confTemplate.format(intfConfStr, rout))
+        f.write(confTemplate.format(intfConfStr, router))
         f.close()
 
 
