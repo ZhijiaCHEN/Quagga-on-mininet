@@ -68,13 +68,11 @@ class SimpleTopo(Topo):
         R5_2 = self.addSwitch('R5_2')
         R5_3 = self.addSwitch('R5_3')
         R6_1 = self.addSwitch('R6_1')
-        R7_1 = self.addSwitch('R7_1')
-        self.routers = [R1_1, R2_1, R3_1, R4_1, R5_1, R5_2, R5_3, R6_1, R7_1]
+        #R7_1 = self.addSwitch('R7_1')
+        self.routers = [R1_1, R2_1, R3_1, R4_1, R5_1, R5_2, R5_3, R6_1]  # , R7_1]
         h1_1 = self.addHost('h1_1')
-        h7_1 = self.addHost('h7_1')
-        #self.hosts = [h1_1, h7_1]
-        routerLinks = [(R1_1, R2_1, 'E'), (R1_1, R3_1, 'E'), (R3_1, R4_1, 'E'), (R2_1, R5_1, 'E'), (R4_1, R5_1, 'E'),
-                       (R5_1, R5_2, 'I'), (R5_2, R5_3, 'I'), (R5_3, R5_1, 'I'), (R5_3, R6_1, 'E'), (R5_2, R7_1, 'E')]
+        h6_1 = self.addHost('h6_1')
+        routerLinks = [(R1_1, R2_1, 'E'), (R1_1, R3_1, 'E'), (R3_1, R4_1, 'E'), (R2_1, R5_1, 'E'), (R4_1, R5_2, 'E'), (R5_2, R5_3, 'I'), (R5_3, R5_1, 'I'), (R5_3, R6_1, 'E')]
         for l in routerLinks:
             n1 = self.genIntfName(l[0], l[2])
             n2 = self.genIntfName(l[1], l[2])
@@ -82,7 +80,7 @@ class SimpleTopo(Topo):
             self.linkEndDict[n2] = n1
             self.addLink(l[0], l[1], intfName1=n1, intfName2=n2)
         self.addLink(R1_1, h1_1, intfName1=self.genIntfName(R1_1, 'G'))
-        self.addLink(R7_1, h7_1, intfName1=self.genIntfName(R7_1, 'G'))
+        self.addLink(R6_1, h6_1, intfName1=self.genIntfName(R6_1, 'G'))
 
     def genIntfName(self, router, orient):
         self.intfCnt += 1
@@ -173,8 +171,8 @@ def main():
     os.system("killall -9 zebra bgpd > /dev/null 2>&1")
     os.system('pgrep -f webserver.py | xargs kill -9')
     topo = SimpleTopo()
-    genZebraConf(topo)
-    genBgpdConf(topo)
+    # genZebraConf(topo)
+    # genBgpdConf(topo)
     net = Mininet(topo=SimpleTopo(), switch=Router, controller=None)
     net.start()
     for router in net.switches:
