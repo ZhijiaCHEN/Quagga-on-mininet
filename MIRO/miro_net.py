@@ -192,8 +192,8 @@ def main():
     os.system("killall -9 zebra bgpd > /dev/null 2>&1")
     os.system('pgrep -f webserver.py | xargs kill -9')
     topo = SimpleTopo()
-    genZebraConf(topo)
-    genBgpdConf(topo)
+    #genZebraConf(topo)
+    #genBgpdConf(topo)
     net = Mininet(topo=topo, switch=Router, controller=None)
     net.start()
     for router in net.switches:
