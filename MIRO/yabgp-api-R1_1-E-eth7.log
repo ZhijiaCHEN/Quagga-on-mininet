@@ -1,0 +1,248 @@
+2019-03-04 12:24:24,300.300 2094 INFO yabgp.agent [-] Log (Re)opened.
+2019-03-04 12:24:24,300.300 2094 INFO yabgp.agent [-] Configuration:
+2019-03-04 12:24:24,300.300 2094 INFO yabgp.agent [-] ********************************************************************************
+2019-03-04 12:24:24,300.300 2094 INFO yabgp.agent [-] Configuration options gathered from:
+2019-03-04 12:24:24,300.300 2094 INFO yabgp.agent [-] command line args: ['--bgp-local_addr=10.0.0.13', '--bgp-local_as=1', '--bgp-remote_addr=10.0.0.14', '--bgp-remote_as=3', '--rest-bind_host=10.0.0.13']
+2019-03-04 12:24:24,300.300 2094 INFO yabgp.agent [-] config files: []
+2019-03-04 12:24:24,300.300 2094 INFO yabgp.agent [-] ================================================================================
+2019-03-04 12:24:24,300.300 2094 INFO yabgp.agent [-] config_dir                     = None
+2019-03-04 12:24:24,300.300 2094 INFO yabgp.agent [-] config_file                    = []
+2019-03-04 12:24:24,300.300 2094 INFO yabgp.agent [-] log_backup_count               = 5
+2019-03-04 12:24:24,300.300 2094 INFO yabgp.agent [-] log_config_file                = None
+2019-03-04 12:24:24,300.300 2094 INFO yabgp.agent [-] log_dir                        = None
+2019-03-04 12:24:24,300.300 2094 INFO yabgp.agent [-] log_file                       = None
+2019-03-04 12:24:24,300.300 2094 INFO yabgp.agent [-] log_file_mode                  = 0644
+2019-03-04 12:24:24,300.300 2094 INFO yabgp.agent [-] use_stderr                     = True
+2019-03-04 12:24:24,300.300 2094 INFO yabgp.agent [-] verbose                        = False
+2019-03-04 12:24:24,300.300 2094 INFO yabgp.agent [-] bgp.add_path                   = None
+2019-03-04 12:24:24,300.300 2094 INFO yabgp.agent [-] bgp.afi_safi                   = ['ipv4']
+2019-03-04 12:24:24,300.300 2094 INFO yabgp.agent [-] bgp.cisco_multi_session        = True
+2019-03-04 12:24:24,300.300 2094 INFO yabgp.agent [-] bgp.cisco_route_refresh        = True
+2019-03-04 12:24:24,300.300 2094 INFO yabgp.agent [-] bgp.enhanced_route_refresh     = True
+2019-03-04 12:24:24,300.300 2094 INFO yabgp.agent [-] bgp.four_bytes_as              = True
+2019-03-04 12:24:24,301.301 2094 INFO yabgp.agent [-] bgp.graceful_restart           = True
+2019-03-04 12:24:24,301.301 2094 INFO yabgp.agent [-] bgp.local_addr                 = 10.0.0.13
+2019-03-04 12:24:24,301.301 2094 INFO yabgp.agent [-] bgp.local_as                   = 1
+2019-03-04 12:24:24,301.301 2094 INFO yabgp.agent [-] bgp.md5                        = ****
+2019-03-04 12:24:24,301.301 2094 INFO yabgp.agent [-] bgp.peer_start_interval        = 10
+2019-03-04 12:24:24,301.301 2094 INFO yabgp.agent [-] bgp.remote_addr                = 10.0.0.14
+2019-03-04 12:24:24,301.301 2094 INFO yabgp.agent [-] bgp.remote_as                  = 3
+2019-03-04 12:24:24,301.301 2094 INFO yabgp.agent [-] bgp.rib                        = True
+2019-03-04 12:24:24,301.301 2094 INFO yabgp.agent [-] bgp.route_refresh              = True
+2019-03-04 12:24:24,301.301 2094 INFO yabgp.agent [-] bgp.running_config             = {}
+2019-03-04 12:24:24,301.301 2094 INFO yabgp.agent [-] time.connect_retry_time        = 30
+2019-03-04 12:24:24,301.301 2094 INFO yabgp.agent [-] time.delay_open_time           = 10
+2019-03-04 12:24:24,301.301 2094 INFO yabgp.agent [-] time.hold_time                 = 180
+2019-03-04 12:24:24,301.301 2094 INFO yabgp.agent [-] time.idle_hold_time            = 30
+2019-03-04 12:24:24,301.301 2094 INFO yabgp.agent [-] time.keep_alive_time           = 60
+2019-03-04 12:24:24,301.301 2094 INFO yabgp.agent [-] rest.bind_host                 = 10.0.0.13
+2019-03-04 12:24:24,301.301 2094 INFO yabgp.agent [-] rest.bind_port                 = 8801
+2019-03-04 12:24:24,301.301 2094 INFO yabgp.agent [-] rest.password                  = ****
+2019-03-04 12:24:24,301.301 2094 INFO yabgp.agent [-] rest.username                  = admin
+2019-03-04 12:24:24,301.301 2094 INFO yabgp.agent [-] keep_alive.last_time           = 0
+2019-03-04 12:24:24,301.301 2094 INFO yabgp.agent [-] message.write_dir              = /home/zhijia/data/bgp/
+2019-03-04 12:24:24,301.301 2094 INFO yabgp.agent [-] message.write_disk             = True
+2019-03-04 12:24:24,301.301 2094 INFO yabgp.agent [-] message.write_keepalive        = False
+2019-03-04 12:24:24,301.301 2094 INFO yabgp.agent [-] message.write_msg_max_size     = 500
+2019-03-04 12:24:24,301.301 2094 INFO yabgp.agent [-] ********************************************************************************
+2019-03-04 12:24:24,301.301 2094 INFO yabgp.agent [-] No handler provided, init default handler
+2019-03-04 12:24:24,302.302 2094 INFO yabgp.config [-] Try to load BGP configuration from CLI input
+2019-03-04 12:24:24,302.302 2094 INFO yabgp.agent [-] Check configurations about message process
+2019-03-04 12:24:24,302.302 2094 INFO yabgp.agent [-] Starting server in PID 2094
+2019-03-04 12:24:24,302.302 2094 INFO yabgp.agent [-] Prepare twisted services
+2019-03-04 12:24:24,302.302 2094 INFO yabgp.agent [-] Get peer configuration
+2019-03-04 12:24:24,302.302 2094 INFO yabgp.agent [-] ---remote_as = 3
+2019-03-04 12:24:24,302.302 2094 INFO yabgp.agent [-] ---remote_addr = 10.0.0.14
+2019-03-04 12:24:24,302.302 2094 INFO yabgp.agent [-] ---local_as = 1
+2019-03-04 12:24:24,302.302 2094 INFO yabgp.agent [-] ---local_addr = 10.0.0.13
+2019-03-04 12:24:24,302.302 2094 INFO yabgp.agent [-] ---md5 = None
+2019-03-04 12:24:24,302.302 2094 INFO yabgp.agent [-] ---afi_safi = ['ipv4']
+2019-03-04 12:24:24,302.302 2094 INFO yabgp.agent [-] ---capability = {'local': {'four_bytes_as': True, 'route_refresh': True, 'cisco_route_refresh': True, 'enhanced_route_refresh': True, 'graceful_restart': True, 'cisco_multi_session': True, 'add_path': None}, 'remote': {}}
+2019-03-04 12:24:24,302.302 2094 INFO yabgp.handler.default_handler [-] BGP message file path is /home/zhijia/data/bgp/10.0.0.14
+2019-03-04 12:24:24,302.302 2094 INFO yabgp.handler.default_handler [-] get the last bgp message seq for this peer
+2019-03-04 12:24:24,302.302 2094 INFO yabgp.handler.default_handler [-] BGP message file 1551655495.6357212.msg
+2019-03-04 12:24:24,302.302 2094 INFO yabgp.handler.default_handler [-] The last bgp message seq number is 42
+2019-03-04 12:24:24,302.302 2094 INFO yabgp.agent [-] Create BGPPeering twsited instance
+2019-03-04 12:24:24,302.302 2094 INFO yabgp.core.factory [-] Init BGPPeering for peer 10.0.0.14
+2019-03-04 12:24:24,302.302 2094 INFO yabgp.agent [-] Prepare RESTAPI service
+2019-03-04 12:24:24,302.302 2094 INFO yabgp.agent [-] reactor_thread_size = 100
+2019-03-04 12:24:24,305.305 2094 INFO yabgp.agent [-] serving RESTAPI on http://10.0.0.13:8801
+2019-03-04 12:24:24,305.305 2094 INFO yabgp.agent [-] Starting BGPPeering twsited instance
+2019-03-04 12:24:24,305.305 2094 INFO yabgp.core.fsm [-] Automatic start
+2019-03-04 12:24:24,305.305 2094 INFO yabgp.core.fsm [-] Do not need Idle Hold, start right now.
+2019-03-04 12:24:24,305.305 2094 INFO yabgp.core.fsm [-] Connect retry counter: 0
+2019-03-04 12:24:24,305.305 2094 INFO yabgp.core.fsm [-] Connect retry timer, time=30
+2019-03-04 12:24:24,305.305 2094 INFO yabgp.core.fsm [-] [10.0.0.14]State is now:CONNECT
+2019-03-04 12:24:24,305.305 2094 INFO yabgp.core.factory [-] (Re)connect to 10.0.0.14
+2019-03-04 12:24:24,305.305 2094 INFO yabgp.core.factory [-] [10.0.0.14]Building a new BGP protocol instance
+2019-03-04 12:24:24,305.305 2094 INFO yabgp.core.protocol [-] [10.0.0.14]TCP Connection established
+2019-03-04 12:24:24,368.368 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP Open message to the peer.
+2019-03-04 12:24:24,368.368 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Probe's Capabilities:
+2019-03-04 12:24:24,368.368 2094 INFO yabgp.core.protocol [-] --four_bytes_as = True
+2019-03-04 12:24:24,368.368 2094 INFO yabgp.core.protocol [-] --route_refresh = True
+2019-03-04 12:24:24,368.368 2094 INFO yabgp.core.protocol [-] --cisco_route_refresh = True
+2019-03-04 12:24:24,368.368 2094 INFO yabgp.core.protocol [-] --enhanced_route_refresh = True
+2019-03-04 12:24:24,368.368 2094 INFO yabgp.core.protocol [-] --graceful_restart = True
+2019-03-04 12:24:24,368.368 2094 INFO yabgp.core.protocol [-] --cisco_multi_session = True
+2019-03-04 12:24:24,368.368 2094 INFO yabgp.core.protocol [-] --add_path = None
+2019-03-04 12:24:24,368.368 2094 INFO yabgp.core.protocol [-] --afi_safi = [(1, 1)]
+2019-03-04 12:24:24,368.368 2094 INFO yabgp.core.fsm [-] [10.0.0.14]State is now:OPENSENT
+2019-03-04 12:24:28,861.861 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP Open message was received
+2019-03-04 12:24:28,861.861 2094 INFO yabgp.core.protocol [-] --version = 4
+2019-03-04 12:24:28,861.861 2094 INFO yabgp.core.protocol [-] --ASN = 3
+2019-03-04 12:24:28,861.861 2094 INFO yabgp.core.protocol [-] --hold time = 5
+2019-03-04 12:24:28,861.861 2094 INFO yabgp.core.protocol [-] --id = 103.0.0.2
+2019-03-04 12:24:28,861.861 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Neighbor's Capabilities:
+2019-03-04 12:24:28,861.861 2094 INFO yabgp.core.protocol [-] --afi_safi = [(1, 1)]
+2019-03-04 12:24:28,861.861 2094 INFO yabgp.core.protocol [-] --cisco_route_refresh = True
+2019-03-04 12:24:28,861.861 2094 INFO yabgp.core.protocol [-] --route_refresh = True
+2019-03-04 12:24:28,861.861 2094 INFO yabgp.core.protocol [-] --four_bytes_as = True
+2019-03-04 12:24:28,861.861 2094 INFO yabgp.core.protocol [-] --graceful_restart = True
+2019-03-04 12:24:28,861.861 2094 INFO yabgp.core.factory [-] Set BGP peer id 103.0.0.2
+2019-03-04 12:24:28,861.861 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Hold time:5,Keepalive time:1.6666666666666667
+2019-03-04 12:24:28,861.861 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:24:28,861.861 2094 INFO yabgp.core.fsm [-] [10.0.0.14]State is now:OPENCONFIRM
+2019-03-04 12:24:28,864.864 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:28,864.864 2094 INFO yabgp.core.fsm [-] [10.0.0.14]State is now:ESTABLISHED
+2019-03-04 12:24:28,864.864 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:29,862.862 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:29,865.865 2094 INFO yabgp.core.protocol [-] {'attr': {1: 0, 2: [(2, [3])], 3: '10.0.0.14', 4: 0}, 'nlri': ['103.2.0.0/16'], 'withdraw': [], 'afi_safi': 'ipv4'}
+2019-03-04 12:24:30,530.530 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:24:30,530.530 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:24:30,863.863 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:31,864.864 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:32,198.198 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:24:32,198.198 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:24:32,866.866 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:32,866.866 2094 INFO yabgp.core.protocol [-] {'attr': {1: 0, 2: [(2, [3])], 3: '10.0.0.14'}, 'nlri': ['103.3.0.0/16'], 'withdraw': [], 'afi_safi': 'ipv4'}
+2019-03-04 12:24:33,866.866 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:33,866.866 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:24:33,866.866 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:24:34,867.867 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:35,533.533 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:24:35,533.533 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:24:35,867.867 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:36,869.869 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:37,201.201 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:24:37,201.201 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:24:37,870.870 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:38,870.870 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:24:38,870.870 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:24:38,870.870 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:39,872.872 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:40,538.538 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:24:40,538.538 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:24:40,872.872 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:41,873.873 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:42,205.205 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:24:42,205.205 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:24:42,873.873 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:43,873.873 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:24:43,873.873 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:24:43,874.874 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:44,874.874 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:45,541.541 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:24:45,541.541 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:24:45,875.875 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:46,877.877 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:47,209.209 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:24:47,209.209 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:24:47,877.877 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:48,678.678 2094 INFO yabgp.api.utils [-] API request url http://10.0.0.13:8801/v1/peer/10.0.0.14/send/update
+2019-03-04 12:24:48,678.678 2094 INFO yabgp.api.utils [-] API request method POST
+2019-03-04 12:24:48,678.678 2094 INFO yabgp.api.utils [-] API POST data {'attr': {'1': 0, '2': [[2, [2, 100]]], '3': '10.0.0.13'}, 'withdraw': [], 'nlri': ['100.1.0.0/16'], 'afi_safi': 'ipv4'}
+2019-03-04 12:24:48,876.876 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:24:48,877.877 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:24:48,877.877 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:49,878.878 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:50,544.544 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:24:50,544.544 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:24:50,879.879 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:51,880.880 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:52,212.212 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:24:52,212.212 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:24:52,881.881 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:53,880.880 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:24:53,880.880 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:24:53,881.881 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:54,883.883 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:55,548.548 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:24:55,549.549 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:24:55,883.883 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:56,883.883 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:57,216.216 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:24:57,216.216 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:24:57,885.885 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:58,884.884 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:24:58,884.884 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:24:58,885.885 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:24:59,886.886 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:00,552.552 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:25:00,552.552 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:25:00,887.887 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:01,889.889 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:02,221.221 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:25:02,221.221 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:25:02,889.889 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:03,890.890 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:25:03,890.890 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:25:03,891.891 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:04,892.892 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:05,559.559 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:25:05,559.559 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:25:05,892.892 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:06,893.893 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:07,227.227 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:25:07,227.227 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:25:07,894.894 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:08,896.896 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:08,896.896 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:25:08,896.896 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:25:09,898.898 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:10,563.563 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:25:10,563.563 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:25:10,899.899 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:11,899.899 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:12,232.232 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:25:12,232.232 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:25:12,901.901 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:13,901.901 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:25:13,901.901 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:25:13,901.901 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:14,902.902 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:15,569.569 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:25:15,569.569 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:25:15,902.902 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:16,903.903 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:17,237.237 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:25:17,237.237 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:25:17,904.904 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:18,904.904 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:18,905.905 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:25:18,905.905 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:25:19,905.905 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:20,574.574 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:25:20,574.574 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:25:20,905.905 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:21,906.906 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:22,243.243 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:25:22,243.243 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:25:22,906.906 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:23,907.907 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:23,911.911 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:25:23,911.911 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:25:24,906.906 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:25,579.579 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:25:25,579.579 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:25:25,908.908 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:26,908.908 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:27,248.248 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:25:27,248.248 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:25:27,908.908 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:28,909.909 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:28,916.916 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:25:28,916.916 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:25:29,909.909 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
+2019-03-04 12:25:30,584.584 2094 INFO yabgp.core.fsm [-] Keep alive timer expires
+2019-03-04 12:25:30,584.584 2094 INFO yabgp.core.protocol [-] [10.0.0.14]Send a BGP KeepAlive message to the peer.
+2019-03-04 12:25:30,910.910 2094 INFO yabgp.core.protocol [-] [10.0.0.14]A BGP KeepAlive message was received from peer.
