@@ -68,7 +68,7 @@ class SimpleTopo(Topo):
         R3_3 = self.addSwitch('R3_3')
         R1_1 = self.addSwitch('R1_1', notInNamespace=True)
         self.routers = [R3_1, R3_2, R3_3, R1_1]
-        routerLinks = [(R3_1, R3_3, 'I'), (R3_2, R3_3, 'I'), (R1_1, R3_1, 'E'), (R1_1, R3_2, 'E')]
+        routerLinks = [(R3_1, R3_3, 'I'), (R3_2, R3_3, 'I'), (R1_1, R3_1, 'E'), (R1_1, R3_2, 'E'), (R1_1, R3_3, 'E')]
         for l in routerLinks:
             n1 = self.getIntfName(l[0], l[2])
             n2 = self.getIntfName(l[1], l[2])
@@ -215,9 +215,10 @@ def main():
                 router.cmd('/home/zhijia/miniconda3/bin/python /home/zhijia/git/yabgp/bin/yabgpd --bgp-local_addr={0} --bgp-local_as=1 --bgp-remote_addr={1} --bgp-remote_as=3 --rest-bind_host={0}  2>/home/zhijia/git/Quagga-on-mininet/MIRO/yabgp-api-{2}.log &'.format(getIntfIP(intf, maskLen=None), getIntfIP(topo.linkEndDict[intf], maskLen=None), intf))
             continue
 
-        router.cmd("/usr/sbin/zebra -f conf/{0}-zebra.conf -d -i /tmp/{0}-zebra.pid > log/{0}-zebra.log 2>&1".format(router.name), shell=True)
+        #router.cmd("/home/usr/sbin/zebra -f conf/{0}-zebra.conf -d -i /tmp/{0}-zebra.pid > log/{0}-zebra.log 2>&1".format(router.name), shell=True)
+        router.cmd("/home/zhijia/quagga-etc/sbin/zebra -f conf/{0}-zebra.conf -d -i /tmp/{0}-zebra.pid > log/{0}-zebra.log 2>&1".format(router.name), shell=True)
         router.waitOutput()
-        router.cmd("/usr/sbin/bgpd -f conf/{0}-bgpd.conf -d -i /tmp/{0}-bgp.pid > log/{0}-bgpd.log 2>&1".format(router.name), shell=True)
+        router.cmd("/home/zhijia/quagga-etc/sbin/bgpd -f conf/{0}-bgpd.conf -d -i /tmp/{0}-bgp.pid > log/{0}-bgpd.log 2>&1".format(router.name), shell=True)
         router.waitOutput()
         log("Starting zebra and bgpd on {}".format(router.name))
 
