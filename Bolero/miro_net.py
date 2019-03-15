@@ -212,7 +212,7 @@ def main():
                 if intf not in topo.linkEndDict:
                     continue
                 router.cmd("ifconfig {} {}".format(intf, getIntfIP(intf)))
-                router.cmd('/home/zhijia/miniconda3/bin/python /home/zhijia/git/yabgp/bin/yabgpd --bgp-local_addr={0} --bgp-local_as=1 --bgp-remote_addr={1} --bgp-remote_as=3 --rest-bind_host={0}  2>/home/zhijia/git/Quagga-on-mininet/MIRO/yabgp-api-{2}.log &'.format(getIntfIP(intf, maskLen=None), getIntfIP(topo.linkEndDict[intf], maskLen=None), intf))
+                router.cmd('/home/zhijia/miniconda3/bin/python /home/zhijia/git/yabgp/bin/yabgpd --bgp-local_addr={0} --bgp-local_as=3 --bgp-remote_addr={1} --bgp-remote_as=3 --rest-bind_host={0}  2>/home/zhijia/git/Quagga-on-mininet/MIRO/yabgp-api-{2}.log &'.format(getIntfIP(intf, maskLen=None), getIntfIP(topo.linkEndDict[intf], maskLen=None), intf))
             continue
 
         #router.cmd("/home/usr/sbin/zebra -f conf/{0}-zebra.conf -d -i /tmp/{0}-zebra.pid > log/{0}-zebra.log 2>&1".format(router.name), shell=True)
