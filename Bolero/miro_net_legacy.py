@@ -74,10 +74,8 @@ class SimpleTopo(Topo):
             if r in self.quagga:
                 self.addSwitch(r)
             else:
-                if r == R4:
-                    self.addSwitch(r, notInNamespace=True, dpid = "4")
                 if r == R5:
-                    self.addSwitch(r, notInNamespace=True, dpid = "5")
+                    self.addSwitch(r, notInNamespace=True, dpid="5")
         self.routerASDict = {R1:3, R2:3, R3:3, R4:3, R5:1}
         routerLinks = [(R1, R3), (R2, R3), (R1, R5), (R2, R5), (R1, R4), (R2, R4), (R3, R4)]
         for l in routerLinks:
@@ -85,14 +83,14 @@ class SimpleTopo(Topo):
                 self.bgpConnDict[l[0]] = []
             if l[1] not in self.bgpConnDict:
                 self.bgpConnDict[l[1]] = []
-            if (l[0] not in self.quagga) or (l[1] not in self.quagga): # In Bolero setup, every router has one and only one iBGP session which is with Bolero
-                self.bgpConnDict[l[0]].append(l[1])
-                self.bgpConnDict[l[1]].append(l[0])
+            self.bgpConnDict[l[0]].append(l[1])
+            self.bgpConnDict[l[1]].append(l[0])
             n1 = self.getIntfName(l[0])
             n2 = self.getIntfName(l[1])
             self.linkEndDict[n1] = n2
             self.linkEndDict[n2] = n1
-            self.addLink(l[0], l[1], intfName1=n1, intfName2=n2)
+            if R4 not in l:
+                self.addLink(l[0], l[1], intfName1=n1, intfName2=n2)
             (self.intfIPDict[n1], self.intfIPDict[n2]) = self.getIntfPairIP(self.routerASDict[l[0]], self.routerASDict[l[1]])
             if l[0] in self.routerIntfCntDict:
                 self.routerIntfCntDict[l[0]] += 1
@@ -191,8 +189,7 @@ def genBgpdConf(topo):
         localAS = topo.routerASDict[router]
         idx = int(router.replace("R", ""))
         f = open("conf/{}-bgpd.conf".format(router), 'w')
-        f.write("! -*- bgp -*-\nhostname {0}\npassword en\nenable password en\n\nrouter bgp {1}\n  bgp router-id {2}.0.0.{3}\n  !network {2}.{3}.0.0/16\n\n".format(router, localAS, localAS+100, idx))
-        boleroInfo = ""
+        f.write("! -*- bgp -*-\nhostname {0}\npassword en\nenable password en\n\nrouter bgp {1}\n  bgp router-id {2}.0.0.{3}\n!  network {2}.{3}.0.0/16\n\n".format(router, localAS, localAS+100, idx))
         for i in range(topo.routerIntfCntDict[router]):
             intf = "{}-eth{}".format(router, i+1)
             if intf not in topo.linkEndDict:
@@ -202,11 +199,8 @@ def genBgpdConf(topo):
             if nRouter not in topo.bgpConnDict[router]: continue
             remoteAS = topo.routerASDict[nRouter]
             remoteAddress = topo.intfIPDict[nIntf]
-            f.write("  neighbor {0} remote-as {1}\n  neighbor {0} next-hop-self\n  neighbor {0} timers 5 5\n\n".format(remoteAddress, remoteAS))
-            if nRouter == "Bolero": # Bolero communicates with quagga routers through R4
-                boleroInfo = "bolero address {}\nbolero port 5432\nbolero user bolero\nbolero password bolero\nbolero\n\n".format(remoteAddress)
-        f.write(boleroInfo)
-        f.write("debug bgp as4\ndebug bgp events\ndebug bgp filters\ndebug bgp fsm\ndebug bgp keepalives\ndebug bgp updates\n\nlog file /tmp/{}-bgpd.log\n\n".format(router))
+            f.write("  neighbor {0} remote-as {1}\n  neighbor {0} next-hop-self\n  neighbor {0} route-map RMAP in\n\n".format(remoteAddress, remoteAS))
+        f.write("ip as-path access-list UNWANTED permit _2_\nroute-map RMAP permit 10\n  match as-path UNWANTED\n  set local-preference 1\nroute-map RMAP permit 20\n\ndebug bgp as4\ndebug bgp events\ndebug bgp filters\ndebug bgp fsm\ndebug bgp keepalives\ndebug bgp updates\n!\nlog file /tmp/{}-bgpd.log\n\n".format(router))
         f.close()
 
 
@@ -246,9 +240,9 @@ def main():
     # all interfaces of bgp agent must be configured before starting quagga routers, otherwise quagga could not connect to Bolero
     for router in net.switches:
         if router.name in topo.quagga:
-            router.cmd("/home/zhijia/quagga-etc/sbin/zebra -f conf/{0}-zebra.conf -d -i /tmp/{0}-zebra.pid > log/{0}-zebra.log 2>&1".format(router.name), shell=True)
+            router.cmd("/usr/sbin/zebra -f conf/{0}-zebra.conf -d -i /tmp/{0}-zebra.pid > log/{0}-zebra.log 2>&1".format(router.name), shell=True)
             router.waitOutput()
-            router.cmd("/home/zhijia/quagga-etc/sbin/bgpd -f conf/{0}-bgpd.conf -d -i /tmp/{0}-bgp.pid > log/{0}-bgpd.log 2>&1".format(router.name), shell=True)
+            router.cmd("/usr/sbin/bgpd -f conf/{0}-bgpd.conf -d -i /tmp/{0}-bgp.pid > log/{0}-bgpd.log 2>&1".format(router.name), shell=True)
             router.waitOutput()
             log("Starting zebra and bgpd on {}".format(router.name))
  

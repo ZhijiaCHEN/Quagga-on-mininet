@@ -83,11 +83,12 @@ AS $$
     import urllib.request
     import sys
 
+    BOLERO_WITHDRAW = "65535:65433"
     msg = {}
-    msg['attr'] = {}
-    msg['withdraw'] = [TD["old"]["prefix"]]
+    msg['attr'] = {"1":0, "2":[[2, TD["old"]["as_path"]]], "3":TD["old"]["next_hop"], "5":TD["old"]["local_preference"], "8": [BOLERO_WITHDRAW]}
+    msg['withdraw'] = []
     msg['afi_safi'] = "ipv4"
-    msg['nlri'] = []
+    msg['nlri'] = [TD["old"]["prefix"]]
     json_data = json.dumps(msg)
     plpy.notice("withdraw_route sends msg: {}".format(json_data))
 
