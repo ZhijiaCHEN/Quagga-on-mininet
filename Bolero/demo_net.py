@@ -63,6 +63,7 @@ class SimpleTopo(Topo):
     routerASDict = {}
     routerIntfCntDict = {}
     bgpConnDict = {}
+    bgpdTelnetAddress = {}
     def __init__(self):
         # Add default members to class.
         super(SimpleTopo, self).__init__()
@@ -92,6 +93,10 @@ class SimpleTopo(Topo):
             self.linkEndDict[n2] = n1
             self.addLink(l[0], l[1], intfName1=n1, intfName2=n2)
             (self.intfIPDict[n1], self.intfIPDict[n2]) = self.getIntfPairIP(self.routerASDict[l[0]], self.routerASDict[l[1]])
+            if l[0] == 'Bolero':
+                self.bgpdTelnetAddress[l[1]] = self.intfIPDict[n2]
+            if l[1] == 'Bolero':
+                self.bgpdTelnetAddress[l[0]] = self.intfIPDict[n1]
             if l[0] in self.routerIntfCntDict:
                 self.routerIntfCntDict[l[0]] += 1
             else:
@@ -255,6 +260,8 @@ def main():
                 router.cmd('/home/zhijia/miniconda3/bin/python /home/zhijia/git/yabgp/bin/yabgpd --bgp-local_addr={0} --bgp-local_as={1} --bgp-remote_addr={2} --bgp-remote_as={3} --rest-bind_host={0}  2>/home/zhijia/git/Quagga-on-mininet/Bolero/yabgp-api-{4}.log &'.format(localAddress, localAS, remoteAddress, remoteAS, router.name))
 
     # all interfaces of bgp agent must be configured before starting quagga routers, otherwise quagga could not connect to Bolero
+    xterms = []
+
     for router in net.switches:
         if router.name in topo.quagga:
             router.cmd("/home/zhijia/quagga-etc/sbin/zebra -f conf/{0}-zebra.conf -d -i /tmp/{0}-zebra.pid > log/{0}-zebra.log 2>&1".format(router.name), shell=True)
@@ -264,14 +271,34 @@ def main():
             router.cmd("/home/zhijia/quagga-etc/sbin/bgpd -f conf/{0}-bgpd.conf -d -i /tmp/{0}-bgp.pid > log/{0}-bgpd.log 2>&1".format(router.name), shell=True)
             router.waitOutput()
             log("Starting zebra ospfd, bgpd on {}".format(router.name))
- 
+            bgpdConnCmd = 'xterm -T "{}" -e python2 telnet.py {}'.format(router.name, topo.bgpdTelnetAddress[router.name])
+            p = subprocess.Popen(bgpdConnCmd,
+                             shell=True,
+                             stdin=subprocess.PIPE,
+                             stdout=subprocess.PIPE)
+            xterms.append(p)
+
     for host in net.hosts:
         host.cmd("ifconfig {}-eth0 {}".format(host.name, getHostIP(host.name)))
         host.cmd("route add default gw {}".format(getGateway(host.name)))
+    tables = ['rib_in','routing_decision']
+    for t in tables:
+        xtermCmd = 'xterm -T "{0}" -e python watch_table.py {0}'.format(t)
+        p = subprocess.Popen(xtermCmd,
+                            shell=True,
+                            stdin=subprocess.PIPE,
+                            stdout=subprocess.PIPE)
+        xterms.append(p)
 
     CLI(net)
     net.stop()
-    os.system("killall -9 zebra ospfd bgpd")
+    for r in topo.quagga:
+        os.system("wmctrl -lp | awk '/{}/{{print $3}}' | xargs kill".format(r))
+    for t in tables:
+        os.system("wmctrl -lp | awk '/{}/{{print $3}}' | xargs kill".format(t))
+        
+    
+    #os.system("killall -9 zebra ospfd bgpd")
 
 
 if __name__ == "__main__":
