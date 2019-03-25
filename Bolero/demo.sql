@@ -10,8 +10,8 @@ CREATE TABLE rib_in(
     remote_router VARCHAR
 );
 
-DROP TABLE IF EXISTS routing_decision CASCADE;
-CREATE TABLE routing_decision(
+DROP TABLE IF EXISTS global_routing_information_base CASCADE;
+CREATE TABLE global_routing_information_base(
     rid INTEGER,
     prefix VARCHAR,
     local_preference INTEGER,
@@ -19,9 +19,12 @@ CREATE TABLE routing_decision(
     next_hop VARCHAR,
     as_path INTEGER[],
     igp_cost INTEGER,
+    source_router VARCHAR,
     target_router VARCHAR,
-    best BOOLEAN DEFAULT FALSE NOT NULL
+    is_best BOOLEAN DEFAULT FALSE NOT NULL
 );
+
+
 
 DROP TABLE IF EXISTS igp_cost CASCADE;
 CREATE TABLE igp_cost(
@@ -132,7 +135,7 @@ BEGIN
         IF (NEW.local_preference = 0) OR (NEW.local_preference IS NULL) THEN
             NEW.local_preference = 100;
         END IF;
-        INSERT INTO routing_decision(target_router, rid, prefix, local_preference, metric, next_hop, as_path, igp_cost) VALUES (router, NEW.rid, NEW.prefix, NEW.local_preference, NEW.metric, NEW.next_hop, NEW.as_path, cost);
+        INSERT INTO global_routing_information_base(source_router, target_router, rid, prefix, local_preference, metric, next_hop, as_path, igp_cost) VALUES (NEW.local_router, router, NEW.rid, NEW.prefix, NEW.local_preference, NEW.metric, NEW.next_hop, NEW.as_path, cost);
     END LOOP;
     RETURN NEW;
 END;
@@ -148,7 +151,7 @@ DROP FUNCTION IF EXISTS remove_route();
 CREATE FUNCTION remove_route() RETURNS TRIGGER AS
 $$
 BEGIN
-    DELETE FROM routing_decision WHERE rid = OLD.rid;
+    DELETE FROM global_routing_information_base WHERE rid = OLD.rid;
     RETURN OLD;
 END;
 $$
@@ -179,8 +182,8 @@ CREATE TRIGGER a_prepare_wiser AFTER INSERT ON rib_in
     FOR EACH ROW
     EXECUTE PROCEDURE prepare_wiser();
 
-DROP FUNCTION IF EXISTS apply_miro(NEW routing_decision);
-CREATE FUNCTION apply_miro(NEW routing_decision) RETURNS routing_decision AS
+DROP FUNCTION IF EXISTS apply_miro(NEW global_routing_information_base);
+CREATE FUNCTION apply_miro(NEW global_routing_information_base) RETURNS global_routing_information_base AS
 $$
 BEGIN
     IF (array_position(NEW.as_path::int[], 2) > 0) THEN
@@ -195,25 +198,24 @@ $$
 LANGUAGE PLPGSQL;
 
 /*
-DROP TRIGGER IF EXISTS fire_miro ON routing_decision;
-CREATE TRIGGER fire_miro BEFORE INSERT ON routing_decision
+DROP TRIGGER IF EXISTS fire_miro ON global_routing_information_base;
+CREATE TRIGGER fire_miro BEFORE INSERT ON global_routing_information_base
     FOR EACH ROW
     EXECUTE PROCEDURE apply_miro();
 */
 
-DROP FUNCTION IF EXISTS apply_wiser(NEW routing_decision);
-CREATE FUNCTION apply_wiser(NEW routing_decision) RETURNS routing_decision AS
+DROP FUNCTION IF EXISTS apply_wiser(NEW global_routing_information_base);
+CREATE FUNCTION apply_wiser(NEW global_routing_information_base) RETURNS global_routing_information_base AS
 $$
 #variable_conflict use_variable
 DECLARE
     min_cost_route RECORD;
-    ret routing_decision%ROWTYPE;
+    ret global_routing_information_base%ROWTYPE;
     i RECORD;
 BEGIN
     /* first check if the target is in the minimum wiser cost + avertise cost path */
     WITH join_cost AS (SELECT rid, (wiser.cost + advertise.cost) AS cost, path FROM wiser JOIN advertise ON wiser.peering_router = advertise.peering_router ORDER BY cost ASC) SELECT * INTO min_cost_route FROM join_cost LIMIT 1;
     IF (NEW.rid != min_cost_route.rid) OR (array_position(min_cost_route.path::VARCHAR[], NEW.target_router::VARCHAR) IS NULL) THEN
-        raise notice 'min_cost_route = %, NEW = %', min_cost_route, NEW;
         ret = NULL;
     ELSE
         INSERT INTO best_join_cost(rid, prefix, cost, path) VALUES (min_cost_route.rid, NEW.prefix, min_cost_route.cost, min_cost_route.path);
@@ -223,7 +225,7 @@ BEGIN
     /* The new route may invalidate an old route that has the target route in the path */
     FOR i IN SELECT * FROM best_join_cost WHERE prefix = NEW.prefix LOOP
         IF (i.cost > min_cost_route.cost) THEN
-            DELETE FROM routing_decision WHERE rid = i.rid;
+            DELETE FROM global_routing_information_base WHERE rid = i.rid;
         END IF;
     END LOOP;
 
@@ -233,8 +235,8 @@ $$
 LANGUAGE PLPGSQL;
 
 /*
-DROP TRIGGER IF EXISTS fire_wiser ON routing_decision;
-CREATE TRIGGER fire_wiser BEFORE INSERT ON routing_decision
+DROP TRIGGER IF EXISTS fire_wiser ON global_routing_information_base;
+CREATE TRIGGER fire_wiser BEFORE INSERT ON global_routing_information_base
     FOR EACH ROW
     EXECUTE PROCEDURE apply_wiser();
 */
@@ -259,8 +261,8 @@ END;
 $$
 LANGUAGE PLPGSQL;
 
-DROP TRIGGER IF EXISTS fire_policy ON routing_decision;
-CREATE TRIGGER fire_policy BEFORE INSERT ON routing_decision
+DROP TRIGGER IF EXISTS fire_policy ON global_routing_information_base;
+CREATE TRIGGER fire_policy BEFORE INSERT ON global_routing_information_base
     FOR EACH ROW
     EXECUTE PROCEDURE apply_policy();
 
@@ -281,18 +283,18 @@ BEGIN
             rec := OLD;
     END CASE;
 
-    SELECT * INTO oldBest FROM routing_decision WHERE target_router = rec.target_router AND prefix = rec.prefix AND best;
-    SELECT * INTO newBest FROM routing_decision WHERE target_router = rec.target_router AND prefix = rec.prefix ORDER BY local_preference DESC, array_length(as_path, 1) ASC, metric ASC, igp_cost ASC LIMIT 1;
+    SELECT * INTO oldBest FROM global_routing_information_base WHERE target_router = rec.target_router AND prefix = rec.prefix AND is_best;
+    SELECT * INTO newBest FROM global_routing_information_base WHERE target_router = rec.target_router AND prefix = rec.prefix ORDER BY local_preference DESC, array_length(as_path, 1) ASC, metric ASC, igp_cost ASC LIMIT 1;
     /* warning: a row is null only if every column is null */
     CASE ARRAY[oldBest IS NULL, newBest IS NULL] /* check triggering event */
         WHEN ARRAY[TRUE, FALSE] THEN
-            UPDATE routing_decision SET best = TRUE WHERE target_router = rec.target_router AND rid = newBest.rid;
+            UPDATE global_routing_information_base SET is_best = TRUE WHERE target_router = rec.target_router AND rid = newBest.rid;
         WHEN ARRAY[TRUE, TRUE] THEN
             /* nothing do do */
         WHEN ARRAY[FALSE, FALSE] THEN
             IF (oldBest.rid != newBest.rid) THEN
-                UPDATE routing_decision SET best = FALSE WHERE target_router = rec.target_router AND rid = oldBest.rid;
-                UPDATE routing_decision SET best = TRUE WHERE target_router = rec.target_router AND rid = newBest.rid;
+                UPDATE global_routing_information_base SET is_best = FALSE WHERE target_router = rec.target_router AND rid = oldBest.rid;
+                UPDATE global_routing_information_base SET is_best = TRUE WHERE target_router = rec.target_router AND rid = newBest.rid;
             END IF;
         /*WHEN ARRAY[FALSE, TRUE] THEN
             This case should not happen.*/
@@ -302,13 +304,13 @@ END;
 $$
 LANGUAGE PLPGSQL;
 
-DROP TRIGGER IF EXISTS add_route ON routing_decision;
-CREATE TRIGGER add_route AFTER INSERT ON routing_decision
+DROP TRIGGER IF EXISTS add_route ON global_routing_information_base;
+CREATE TRIGGER add_route AFTER INSERT ON global_routing_information_base
     FOR EACH ROW
     EXECUTE PROCEDURE bgp_decision_process();
 
-DROP TRIGGER IF EXISTS remove_route ON routing_decision;
-CREATE TRIGGER remove_route AFTER DELETE ON routing_decision
+DROP TRIGGER IF EXISTS remove_route ON global_routing_information_base;
+CREATE TRIGGER remove_route AFTER DELETE ON global_routing_information_base
     FOR EACH ROW
     EXECUTE PROCEDURE bgp_decision_process();
 
@@ -349,10 +351,10 @@ AS $$
         plpy.notice("Announcement prefix {} to router {} failed: {}".format(TD["new"]["prefix"], TD["new"]["target_router"], str(e)))
 $$ LANGUAGE plpython3u;
 
-DROP TRIGGER IF EXISTS new_best ON routing_decision;
-CREATE TRIGGER new_best AFTER UPDATE ON routing_decision
+DROP TRIGGER IF EXISTS new_best ON global_routing_information_base;
+CREATE TRIGGER new_best AFTER UPDATE ON global_routing_information_base
     FOR EACH ROW
-    WHEN (NOT OLD.best AND NEW.best)
+    WHEN (NOT OLD.is_best AND NEW.is_best)
     EXECUTE PROCEDURE announce_route();
 
 DROP FUNCTION IF EXISTS withdraw_route();
@@ -393,13 +395,13 @@ AS $$
         plpy.notice("Withdraw prefix {} from router {} failed: {}".format(TD["old"]["prefix"], TD["old"]["target_router"], str(e)))
 $$ LANGUAGE plpython3u;
 
-DROP TRIGGER IF EXISTS old_best ON routing_decision;
-CREATE TRIGGER old_best AFTER UPDATE ON routing_decision
+DROP TRIGGER IF EXISTS old_best ON global_routing_information_base;
+CREATE TRIGGER old_best AFTER UPDATE ON global_routing_information_base
     FOR EACH ROW
-    WHEN (OLD.best AND NOT NEW.best)
+    WHEN (OLD.is_best AND NOT NEW.is_best)
     EXECUTE PROCEDURE withdraw_route();
 
-DROP TRIGGER IF EXISTS withdraw_route ON routing_decision;
-CREATE TRIGGER withdraw_route AFTER DELETE ON routing_decision
+DROP TRIGGER IF EXISTS withdraw_route ON global_routing_information_base;
+CREATE TRIGGER withdraw_route AFTER DELETE ON global_routing_information_base
     FOR EACH ROW
     EXECUTE PROCEDURE withdraw_route();

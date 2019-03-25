@@ -281,7 +281,7 @@ def main():
     for host in net.hosts:
         host.cmd("ifconfig {}-eth0 {}".format(host.name, getHostIP(host.name)))
         host.cmd("route add default gw {}".format(getGateway(host.name)))
-    tables = ['rib_in','routing_decision']
+    tables = ['global_routing_information_base']
     for t in tables:
         xtermCmd = 'xterm -T "{0}" -e python watch_table.py {0}'.format(t)
         p = subprocess.Popen(xtermCmd,
@@ -291,15 +291,11 @@ def main():
         xterms.append(p)
 
     CLI(net)
-    net.stop()
     for r in topo.quagga:
         os.system("wmctrl -lp | awk '/{}/{{print $3}}' | xargs kill".format(r))
     for t in tables:
         os.system("wmctrl -lp | awk '/{}/{{print $3}}' | xargs kill".format(t))
-        
-    
-    #os.system("killall -9 zebra ospfd bgpd")
-
-
+    os.system('killall -2 zebra ospfd bgpd')
+    net.stop()
 if __name__ == "__main__":
     main()
