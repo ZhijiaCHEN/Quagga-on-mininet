@@ -62,6 +62,12 @@ CREATE TABLE routers(
 );
 INSERT INTO routers VALUES ('103.0.0.1', '103.0.0.10', 8801), ('103.0.0.2', '103.0.0.14', 8801), ('103.0.0.3', '103.0.0.18', 8801), ('103.0.0.4', '103.0.0.14', 8801), ('103.0.0.5', '103.0.0.18', 8801), ('103.0.0.6', '103.0.0.14', 8801);
 
+DROP TABLE IF EXISTS border CASCADE;
+CREATE TABLE border(
+    router VARCHAR PRIMARY KEY
+);
+INSERT INTO border VALUES ('103.0.0.1'), ('103.0.0.2'), ('103.0.0.3'), ('103.0.0.4'), ('103.0.0.5');
+
 DROP TABLE IF EXISTS links CASCADE;
 CREATE TABLE links(
     r1 VARCHAR,
@@ -102,6 +108,24 @@ CREATE TABLE policy(
     policy_function VARCHAR
 );
 
+DROP TABLE IF EXISTS min_traverse_cost CASCADE;
+CREATE TABLE min_traverse_cost(
+    source_router VARCHAR,
+    path VARCHAR[],
+    cost INTEGER
+);
+INSERT INTO min_traverse_cost SELECT source_router, path, cost FROM igp_cost WHERE source_router IN (SELECT router FROM border) AND destination_router IN (SELECT router FROM border) AND (source_router != destination_router) ORDER BY source_router, cost ASC;
+DELETE FROM min_traverse_cost tmp1 WHERE cost > (SELECT min(cost) FROM min_traverse_cost WHERE min_traverse_cost.source_router = tmp1.source_router);
+
+DROP TABLE IF EXISTS hot_potato_path CASCADE;
+CREATE TABLE hot_potato_path(
+    rid INTEGER REFERENCES rib_in(rid) ON DELETE CASCADE,
+    prefix VARCHAR,
+    source_router VARCHAR,
+    path VARCHAR[],
+    cost INTEGER
+);
+
 DROP FUNCTION IF EXISTS clear_rib();
 CREATE FUNCTION clear_rib() RETURNS TRIGGER AS
 $$
@@ -117,8 +141,8 @@ CREATE TRIGGER change_policy AFTER INSERT OR DELETE OR UPDATE ON policy
     FOR EACH ROW
     EXECUTE PROCEDURE clear_rib();
 
-DROP FUNCTION IF EXISTS prepare_route();
-CREATE FUNCTION prepare_route() RETURNS TRIGGER AS
+DROP FUNCTION IF EXISTS distribute_route(NEW rib_in);
+CREATE FUNCTION distribute_route(NEW rib_in) RETURNS rib_in AS
 $$
 #variable_conflict use_variable
 DECLARE
@@ -142,8 +166,17 @@ END;
 $$
 LANGUAGE PLPGSQL;
 
+DROP FUNCTION IF EXISTS prepare_route();
+CREATE FUNCTION prepare_route() RETURNS TRIGGER AS
+$$
+BEGIN
+    RETURN distribute_route(NEW);
+END;
+$$
+LANGUAGE PLPGSQL;
+
 DROP TRIGGER IF EXISTS insert_route ON rib_in;
-CREATE TRIGGER insert_route AFTER INSERT ON rib_in
+CREATE TRIGGER insert_route AFTER INSERT OR UPDATE ON rib_in
     FOR EACH ROW
     EXECUTE PROCEDURE prepare_route();
 
@@ -193,6 +226,74 @@ BEGIN
     END IF;
     raise notice 'miro return %', NEW;
     RETURN NEW;
+END;
+$$
+LANGUAGE PLPGSQL;
+
+DROP FUNCTION IF EXISTS prepare_hot_potato();
+CREATE FUNCTION prepare_hot_potato() RETURNS TRIGGER AS
+$$
+#variable_conflict use_variable
+DECLARE
+    currentMin INTEGER;
+    newMIN INTEGER;
+    rec RECORD;
+BEGIN
+    SELECT min(cost) INTO newMIN FROM min_traverse_cost WHERE source_router = NEW.source_router LIMIT 1;
+    SELECT cost into currentMin FROM hot_potato_path WHERE prefix = NEW.prefix LIMIT 1;
+    IF (newMIN <= currentMin) THEN
+        IF (newMIN < currentMin) THEN
+            DELETE FROM hot_potato_path WHERE prefix = NEW.prefix;
+        END IF;
+        FOR rec IN SELECT path, cost FROM min_traverse_cost WHERE source_router = NEW.source_router AND cost <= newMIN LOOP
+            INSERT INTO hot_potato_path VALUES(NEW.rid, NEW.prefix, NEW.source_router, rec.path, rec.cost);
+        END LOOP;
+    END IF;
+    RETURN NEW;
+END;
+$$
+LANGUAGE PLPGSQL;
+
+DROP TRIGGER IF EXISTS a_prepare_hot_potato ON rib_in;
+CREATE TRIGGER a_prepare_hot_potato AFTER INSERT ON rib_in
+    FOR EACH ROW
+    EXECUTE PROCEDURE prepare_hot_potato();
+
+
+DROP FUNCTION IF EXISTS apply_hot_potato(NEW global_routing_information_base);
+CREATE FUNCTION apply_hot_potato(NEW global_routing_information_base) RETURNS global_routing_information_base AS
+$$
+#variable_conflict use_variable
+DECLARE
+    rec RECORD;
+BEGIN
+    FOR rec IN SELECT source_router, path FROM hot_potato_path WHERE prefix = NEW.prefix LOOP
+        IF (NEW.source_router != rec.source_router) OR (array_position(rec.path::VARCHAR[], NEW.target_router) IS NULL) THEN
+            RETURN NULL;
+        ELSE
+            RETURN NEW;
+        END IF;
+    END LOOP;
+END;
+$$
+LANGUAGE PLPGSQL;
+
+DROP FUNCTION IF EXISTS apply_hot_potato_delete();
+CREATE FUNCTION apply_hot_potato() RETURNS TRIGGER AS
+$$
+#variable_conflict use_variable
+DECLARE
+    rec RECORD;
+    ri RECORD;
+BEGIN
+    FOR ri IN SELECT source_router, cost FROM min_traverse_cost LOOP
+        SELECT * INTO rec FROM rib_in WHERE prefix = OLD.prefix AND source_router = ri.source_router;
+        IF (rec IS NOT NULL) THEN
+            UPDATE rib_in SET rid = rid WHERE rid = rec.rid;
+            BREAK;
+        END IF;
+    END LOOP;
+    RETURN OLD;
 END;
 $$
 LANGUAGE PLPGSQL;
