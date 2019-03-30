@@ -24,8 +24,6 @@ CREATE TABLE global_routing_information_base(
     is_best BOOLEAN DEFAULT FALSE NOT NULL
 );
 
-
-
 DROP TABLE IF EXISTS igp_cost CASCADE;
 CREATE TABLE igp_cost(
     source_router VARCHAR,
@@ -34,39 +32,25 @@ CREATE TABLE igp_cost(
     path VARCHAR[]
 );
 INSERT INTO igp_cost VALUES
-('103.0.0.1', '103.0.0.2', 4, ARRAY['103.0.0.1', '103.0.0.6', '103.0.0.2']), ('103.0.0.2', '103.0.0.1', 4, ARRAY['103.0.0.2', '103.0.0.6', '103.0.0.1']), 
-('103.0.0.1', '103.0.0.3', 5, ARRAY['103.0.0.1', '103.0.0.6', '103.0.0.3']), ('103.0.0.3', '103.0.0.1', 5, ARRAY['103.0.0.3', '103.0.0.6', '103.0.0.1']), 
-('103.0.0.1', '103.0.0.4', 8, ARRAY['103.0.0.1', '103.0.0.6', '103.0.0.4']), ('103.0.0.4', '103.0.0.1', 8, ARRAY['103.0.0.4', '103.0.0.6', '103.0.0.1']), 
-('103.0.0.1', '103.0.0.5', 15, ARRAY['103.0.0.1', '103.0.0.6', '103.0.0.5']), ('103.0.0.5', '103.0.0.1', 15, ARRAY['103.0.0.5', '103.0.0.6', '103.0.0.1']), 
-('103.0.0.1', '103.0.0.6', 3, ARRAY['103.0.0.1', '103.0.0.6']), ('103.0.0.6', '103.0.0.1', 3, ARRAY['103.0.0.6', '103.0.0.1']), 
-
-('103.0.0.2', '103.0.0.3', 3, ARRAY['103.0.0.2', '103.0.0.6', '103.0.0.3']), ('103.0.0.3', '103.0.0.2', 3, ARRAY['103.0.0.3', '103.0.0.6', '103.0.0.2']), 
-('103.0.0.2', '103.0.0.4', 6, ARRAY['103.0.0.2', '103.0.0.6', '103.0.0.4']), ('103.0.0.4', '103.0.0.2', 6, ARRAY['103.0.0.4', '103.0.0.6', '103.0.0.2']), 
-('103.0.0.2', '103.0.0.5', 13, ARRAY['103.0.0.2', '103.0.0.6', '103.0.0.5']), ('103.0.0.5', '103.0.0.2', 13, ARRAY['103.0.0.5', '103.0.0.6', '103.0.0.2']), 
-('103.0.0.2', '103.0.0.6', 1, ARRAY['103.0.0.2', '103.0.0.6']), ('103.0.0.6', '103.0.0.2', 1, ARRAY['103.0.0.6', '103.0.0.2']), 
-
-('103.0.0.3', '103.0.0.4', 7, ARRAY['103.0.0.3', '103.0.0.6', '103.0.0.4']), ('103.0.0.4', '103.0.0.3', 7, ARRAY['103.0.0.4', '103.0.0.6', '103.0.0.3']), 
-('103.0.0.3', '103.0.0.5', 14, ARRAY['103.0.0.3', '103.0.0.6', '103.0.0.5']), ('103.0.0.5', '103.0.0.3', 14, ARRAY['103.0.0.5', '103.0.0.6', '103.0.0.3']), 
-('103.0.0.3', '103.0.0.6', 2, ARRAY['103.0.0.3', '103.0.0.6']), ('103.0.0.6', '103.0.0.3', 2, ARRAY['103.0.0.6', '103.0.0.3']), 
-
-('103.0.0.4', '103.0.0.5', 17, ARRAY['103.0.0.4', '103.0.0.6', '103.0.0.5']), ('103.0.0.5', '103.0.0.4', 17, ARRAY['103.0.0.5', '103.0.0.6', '103.0.0.4']), 
-('103.0.0.4', '103.0.0.6', 5, ARRAY['103.0.0.4', '103.0.0.6']), ('103.0.0.6', '103.0.0.4', 5, ARRAY['103.0.0.6', '103.0.0.4']), 
-
-('103.0.0.5', '103.0.0.6', 12, ARRAY['103.0.0.5', '103.0.0.6']), ('103.0.0.6', '103.0.0.5', 12, ARRAY['103.0.0.6', '103.0.0.5']);
-
+('103.0.0.1', '103.0.0.2', 8, ARRAY['103.0.0.1', '103.0.0.3', '103.0.0.2']), ('103.0.0.2', '103.0.0.1', 8, ARRAY['103.0.0.2', '103.0.0.3', '103.0.0.1']), 
+('103.0.0.1', '103.0.0.3', 5, ARRAY['103.0.0.1', '103.0.0.3']), ('103.0.0.3', '103.0.0.1', 5, ARRAY['103.0.0.3', '103.0.0.1']), 
+('103.0.0.2', '103.0.0.3', 3, ARRAY['103.0.0.2', '103.0.0.3']), ('103.0.0.3', '103.0.0.2', 3, ARRAY['103.0.0.3', '103.0.0.2']),
+('103.0.0.1', '103.0.0.1', 0, ARRAY['103.0.0.1']),
+('103.0.0.2', '103.0.0.2', 0, ARRAY['103.0.0.2']),
+('103.0.0.3', '103.0.0.3', 0, ARRAY['103.0.0.3']);
 DROP TABLE IF EXISTS routers CASCADE;
 CREATE TABLE routers(
     id VARCHAR PRIMARY KEY,
     api_address VARCHAR,
     api_port VARCHAR
 );
-INSERT INTO routers VALUES ('103.0.0.1', '103.0.0.10', 8801), ('103.0.0.2', '103.0.0.14', 8801), ('103.0.0.3', '103.0.0.18', 8801), ('103.0.0.4', '103.0.0.14', 8801), ('103.0.0.5', '103.0.0.18', 8801), ('103.0.0.6', '103.0.0.14', 8801);
+INSERT INTO routers VALUES ('103.0.0.1', '103.0.0.10', 8801), ('103.0.0.2', '103.0.0.14', 8801), ('103.0.0.3', '103.0.0.18', 8801);
 
 DROP TABLE IF EXISTS border CASCADE;
 CREATE TABLE border(
     router VARCHAR PRIMARY KEY
 );
-INSERT INTO border VALUES ('103.0.0.1'), ('103.0.0.2'), ('103.0.0.3'), ('103.0.0.4'), ('103.0.0.5');
+INSERT INTO border VALUES ('103.0.0.1'), ('103.0.0.2'), ('103.0.0.3');
 
 DROP TABLE IF EXISTS links CASCADE;
 CREATE TABLE links(
@@ -79,28 +63,30 @@ CREATE TABLE links(
 
 INSERT INTO links VALUES('103.0.0.1', '103.0.0.1', '103.0.0.6', '103.0.0.2', 3), ('103.0.0.6', '103.0.0.2', '103.0.0.1', '103.0.0.1', 3), ('103.0.0.2', '103.0.0.5', '103.0.0.6', '103.0.0.6', 1), ('103.0.0.6', '103.0.0.6', '103.0.0.2', '103.0.0.5', 1), ('103.0.0.3', '103.0.0.10', '103.0.0.6', '103.0.0.9', 2), ('103.0.0.6', '103.0.0.9', '103.0.0.3', '103.0.0.10', 2), ('103.0.0.4', '103.0.0.14', '103.0.0.6', '103.0.0.13', 5), ('103.0.0.6', '103.0.0.13', '103.0.0.4', '103.0.0.14', 5), ('103.0.0.5', '103.0.0.18', '103.0.0.6', '103.0.0.17', 12), ('103.0.0.6', '103.0.0.17', '103.0.0.5', '103.0.0.18', 12);
 
-DROP TABLE IF EXISTS wiser CASCADE;
-CREATE TABLE wiser(
-    rid INTEGER REFERENCES rib_in(rid) ON DELETE CASCADE,
-    peering_router VARCHAR,
-    cost INTEGER,
-    path VARCHAR[]
+DROP TABLE IF EXISTS peer CASCADE;
+CREATE TABLE peer(
+    local VARCHAR,
+    remote VARCHAR
 );
+INSERT INTO peer VALUES('103.0.0.1', '10.0.0.2'), ('103.0.0.1', '10.0.0.6'), ('103.0.0.2', '10.0.0.10'), ('103.0.0.2', '10.0.0.14');
 
-DROP TABLE IF EXISTS advertise;
-CREATE TABLE advertise(
-    peering_router VARCHAR,
-    cost INT
+DROP TABLE IF EXISTS local_wiser CASCADE;
+CREATE TABLE local_wiser(
+    target_router VARCHAR,
+    source_router VARCHAR,
+    cost INTEGER
 );
-INSERT INTO advertise VALUES ('103.0.0.3', 40), ('103.0.0.4', 20), ('103.0.0.5', 10);
+INSERT INTO local_wiser SELECT source_router, destination_router, cost FROM igp_cost;
 
-DROP TABLE IF EXISTS best_join_cost;
-CREATE TABLE best_join_cost(
-    rid INTEGER REFERENCES rib_in(rid) ON DELETE CASCADE,
-    prefix VARCHAR,
-    cost INTEGER,
-    path VARCHAR[]
+DROP TABLE IF EXISTS remote_wiser CASCADE;
+CREATE TABLE remote_wiser(
+    next_hop VARCHAR,
+    cost INTEGER
 );
+INSERT INTO remote_wiser VALUES('10.0.0.2', 4), ('10.0.0.10', 8), ('10.0.0.6', 2), ('10.0.0.14', 6);
+
+DROP VIEW IF EXISTS wiser;
+CREATE VIEW wiser AS SELECT target_router, next_hop, (local_wiser.cost+remote_wiser.cost) AS cost FROM local_wiser JOIN peer ON source_router = local JOIN remote_wiser ON next_hop = remote;
 
 DROP TABLE IF EXISTS policy;
 CREATE TABLE policy(
@@ -115,22 +101,15 @@ CREATE TABLE min_traverse_cost(
     cost INTEGER
 );
 INSERT INTO min_traverse_cost SELECT source_router, path, cost FROM igp_cost WHERE source_router IN (SELECT router FROM border) AND destination_router IN (SELECT router FROM border) AND (source_router != destination_router) ORDER BY source_router, cost ASC;
+
 DELETE FROM min_traverse_cost tmp1 WHERE cost > (SELECT min(cost) FROM min_traverse_cost WHERE min_traverse_cost.source_router = tmp1.source_router);
 
-DROP TABLE IF EXISTS hot_potato_path CASCADE;
-CREATE TABLE hot_potato_path(
-    rid INTEGER REFERENCES rib_in(rid) ON DELETE CASCADE,
-    prefix VARCHAR,
-    source_router VARCHAR,
-    path VARCHAR[],
-    cost INTEGER
-);
-
-DROP FUNCTION IF EXISTS clear_rib();
-CREATE FUNCTION clear_rib() RETURNS TRIGGER AS
+DROP FUNCTION IF EXISTS reprocess_rib();
+CREATE FUNCTION reprocess_rib() RETURNS TRIGGER AS
 $$
 BEGIN
-    DELETE FROM rib_in;
+    DELETE FROM global_routing_information_base;
+    UPDATE rib_in SET rid = rid; /* touch every route to trigger process_route procedure */
     RETURN NULL;
 END;
 $$
@@ -139,7 +118,7 @@ LANGUAGE PLPGSQL;
 DROP TRIGGER IF EXISTS change_policy ON policy;
 CREATE TRIGGER change_policy AFTER INSERT OR DELETE OR UPDATE ON policy
     FOR EACH ROW
-    EXECUTE PROCEDURE clear_rib();
+    EXECUTE PROCEDURE reprocess_rib();
 
 DROP FUNCTION IF EXISTS distribute_route(NEW rib_in);
 CREATE FUNCTION distribute_route(NEW rib_in) RETURNS rib_in AS
@@ -157,7 +136,7 @@ BEGIN
         END IF;
 
         IF (NEW.local_preference = 0) OR (NEW.local_preference IS NULL) THEN
-            NEW.local_preference = 100;
+            NEW.local_preference := 100;
         END IF;
         INSERT INTO global_routing_information_base(source_router, target_router, rid, prefix, local_preference, metric, next_hop, as_path, igp_cost) VALUES (NEW.local_router, router, NEW.rid, NEW.prefix, NEW.local_preference, NEW.metric, NEW.next_hop, NEW.as_path, cost);
     END LOOP;
@@ -166,8 +145,8 @@ END;
 $$
 LANGUAGE PLPGSQL;
 
-DROP FUNCTION IF EXISTS prepare_route();
-CREATE FUNCTION prepare_route() RETURNS TRIGGER AS
+DROP FUNCTION IF EXISTS process_route();
+CREATE FUNCTION process_route() RETURNS TRIGGER AS
 $$
 BEGIN
     RETURN distribute_route(NEW);
@@ -178,7 +157,7 @@ LANGUAGE PLPGSQL;
 DROP TRIGGER IF EXISTS insert_route ON rib_in;
 CREATE TRIGGER insert_route AFTER INSERT OR UPDATE ON rib_in
     FOR EACH ROW
-    EXECUTE PROCEDURE prepare_route();
+    EXECUTE PROCEDURE process_route();
 
 DROP FUNCTION IF EXISTS remove_route();
 CREATE FUNCTION remove_route() RETURNS TRIGGER AS
@@ -195,105 +174,24 @@ CREATE TRIGGER delete_route AFTER DELETE ON rib_in
     FOR EACH ROW
     EXECUTE PROCEDURE remove_route();
 
-DROP FUNCTION IF EXISTS prepare_wiser();
-CREATE FUNCTION prepare_wiser () RETURNS TRIGGER AS
-$$
-#variable_conflict use_variable
-DECLARE
-    rec RECORD;
-BEGIN
-    FOR rec IN SELECT source_router AS ingress, destination_router AS egress, cost, path FROM igp_cost WHERE source_router = NEW.local_router AND destination_router IN (SELECT peering_router FROM advertise) LOOP
-        INSERT INTO wiser(rid, peering_router, cost, path) VALUES (NEW.rid, rec.egress, rec.cost, rec.path);
-    END LOOP;
-    RETURN NEW;
-END;
-$$
-LANGUAGE PLPGSQL;
-
-DROP TRIGGER IF EXISTS a_prepare_wiser ON rib_in;
-CREATE TRIGGER a_prepare_wiser AFTER INSERT ON rib_in
-    FOR EACH ROW
-    EXECUTE PROCEDURE prepare_wiser();
-
 DROP FUNCTION IF EXISTS apply_miro(NEW global_routing_information_base);
 CREATE FUNCTION apply_miro(NEW global_routing_information_base) RETURNS global_routing_information_base AS
 $$
+#variable_conflict use_variable
+DECLARE
+    newPrf INTEGER;
+    maxPrf INTEGER;
+    minPrf INTEGER;
 BEGIN
+    maxPrf := 65536;
+    minPrf := 0;
     IF (array_position(NEW.as_path::int[], 2) > 0) THEN
-        raise notice 'miro return NULL';
-        RETURN NULL;
-        /* NEW.local_preference = 1; */
+        maxPrf := 32768;
+    ELSE
+        minPrf := 32768;
     END IF;
-    raise notice 'miro return %', NEW;
+    NEW.local_preference := (minPrf + maxPrf)/2;
     RETURN NEW;
-END;
-$$
-LANGUAGE PLPGSQL;
-
-DROP FUNCTION IF EXISTS prepare_hot_potato();
-CREATE FUNCTION prepare_hot_potato() RETURNS TRIGGER AS
-$$
-#variable_conflict use_variable
-DECLARE
-    currentMin INTEGER;
-    newMIN INTEGER;
-    rec RECORD;
-BEGIN
-    SELECT min(cost) INTO newMIN FROM min_traverse_cost WHERE source_router = NEW.source_router LIMIT 1;
-    SELECT cost into currentMin FROM hot_potato_path WHERE prefix = NEW.prefix LIMIT 1;
-    IF (newMIN <= currentMin) THEN
-        IF (newMIN < currentMin) THEN
-            DELETE FROM hot_potato_path WHERE prefix = NEW.prefix;
-        END IF;
-        FOR rec IN SELECT path, cost FROM min_traverse_cost WHERE source_router = NEW.source_router AND cost <= newMIN LOOP
-            INSERT INTO hot_potato_path VALUES(NEW.rid, NEW.prefix, NEW.source_router, rec.path, rec.cost);
-        END LOOP;
-    END IF;
-    RETURN NEW;
-END;
-$$
-LANGUAGE PLPGSQL;
-
-DROP TRIGGER IF EXISTS a_prepare_hot_potato ON rib_in;
-CREATE TRIGGER a_prepare_hot_potato AFTER INSERT ON rib_in
-    FOR EACH ROW
-    EXECUTE PROCEDURE prepare_hot_potato();
-
-
-DROP FUNCTION IF EXISTS apply_hot_potato(NEW global_routing_information_base);
-CREATE FUNCTION apply_hot_potato(NEW global_routing_information_base) RETURNS global_routing_information_base AS
-$$
-#variable_conflict use_variable
-DECLARE
-    rec RECORD;
-BEGIN
-    FOR rec IN SELECT source_router, path FROM hot_potato_path WHERE prefix = NEW.prefix LOOP
-        IF (NEW.source_router != rec.source_router) OR (array_position(rec.path::VARCHAR[], NEW.target_router) IS NULL) THEN
-            RETURN NULL;
-        ELSE
-            RETURN NEW;
-        END IF;
-    END LOOP;
-END;
-$$
-LANGUAGE PLPGSQL;
-
-DROP FUNCTION IF EXISTS apply_hot_potato_delete();
-CREATE FUNCTION apply_hot_potato() RETURNS TRIGGER AS
-$$
-#variable_conflict use_variable
-DECLARE
-    rec RECORD;
-    ri RECORD;
-BEGIN
-    FOR ri IN SELECT source_router, cost FROM min_traverse_cost LOOP
-        SELECT * INTO rec FROM rib_in WHERE prefix = OLD.prefix AND source_router = ri.source_router;
-        IF (rec IS NOT NULL) THEN
-            UPDATE rib_in SET rid = rid WHERE rid = rec.rid;
-            BREAK;
-        END IF;
-    END LOOP;
-    RETURN OLD;
 END;
 $$
 LANGUAGE PLPGSQL;
@@ -310,27 +208,38 @@ CREATE FUNCTION apply_wiser(NEW global_routing_information_base) RETURNS global_
 $$
 #variable_conflict use_variable
 DECLARE
-    min_cost_route RECORD;
-    ret global_routing_information_base%ROWTYPE;
-    i RECORD;
+    newWiser INTEGER;
+    newPrf INTEGER;
+    maxPrf INTEGER;
+    minPrf INTEGER;
 BEGIN
-    /* first check if the target is in the minimum wiser cost + avertise cost path */
-    WITH join_cost AS (SELECT rid, (wiser.cost + advertise.cost) AS cost, path FROM wiser JOIN advertise ON wiser.peering_router = advertise.peering_router ORDER BY cost ASC) SELECT * INTO min_cost_route FROM join_cost LIMIT 1;
-    IF (NEW.rid != min_cost_route.rid) OR (array_position(min_cost_route.path::VARCHAR[], NEW.target_router::VARCHAR) IS NULL) THEN
-        ret = NULL;
-    ELSE
-        INSERT INTO best_join_cost(rid, prefix, cost, path) VALUES (min_cost_route.rid, NEW.prefix, min_cost_route.cost, min_cost_route.path);
-        ret = NEW;
+    newWiser := (SELECT cost FROM wiser WHERE target_router = NEW.target_router AND next_hop = NEW.next_hop);
+    IF (newWiser IS NULL) THEN
+        RAISE EXCEPTION 'Undefined Wiser cost from target router % to next hop %', NEW.target_router, NEW.next_hop;
     END IF;
 
-    /* The new route may invalidate an old route that has the target route in the path */
-    FOR i IN SELECT * FROM best_join_cost WHERE prefix = NEW.prefix LOOP
-        IF (i.cost > min_cost_route.cost) THEN
-            DELETE FROM global_routing_information_base WHERE rid = i.rid;
-        END IF;
-    END LOOP;
+    SELECT max(local_preference) INTO minPrf FROM global_routing_information_base WHERE target_router = NEW.target_router AND prefix = NEW.prefix AND (SELECT cost FROM wiser WHERE wiser.target_router = global_routing_information_base.target_router AND wiser.next_hop = global_routing_information_base.next_hop) > newWiser;
 
-    RETURN ret;
+    SELECT min(local_preference) INTO maxPrf FROM global_routing_information_base WHERE target_router = NEW.target_router AND prefix = NEW.prefix AND (SELECT cost FROM wiser WHERE wiser.target_router = global_routing_information_base.target_router AND wiser.next_hop = global_routing_information_base.next_hop) < newWiser;
+
+    CASE ARRAY[minPrf IS NULL, maxPrf IS NULL]
+        WHEN ARRAY[TRUE, TRUE] THEN
+            minPrf := 0;
+            maxPrf := 65536;
+        WHEN ARRAY[TRUE, FALSE] THEN
+            minPrf := 0;
+        WHEN ARRAY[FALSE, TRUE] THEN
+            maxPrf := 65536;
+        WHEN ARRAY[FALSE, FALSE] THEN
+            /* Nothing to do */
+    END CASE;
+    newPrf := (minPrf + maxPrf)/2;
+    IF (newPrf > minPrf) AND (newPrf < maxPrf) THEN
+        NEW.local_preference := newPrf;
+    ELSE
+        RAISE EXCEPTION 'Run out of local preference value for Wiser policy!';
+    END IF;
+    RETURN NEW;
 END;
 $$
 LANGUAGE PLPGSQL;
@@ -341,6 +250,65 @@ CREATE TRIGGER fire_wiser BEFORE INSERT ON global_routing_information_base
     FOR EACH ROW
     EXECUTE PROCEDURE apply_wiser();
 */
+
+DROP FUNCTION IF EXISTS apply_miro_wiser(NEW global_routing_information_base);
+CREATE FUNCTION apply_miro_wiser(NEW global_routing_information_base) RETURNS global_routing_information_base AS
+$$
+#variable_conflict use_variable
+DECLARE
+    newWiser INTEGER;
+    newPrf INTEGER;
+    maxPrf INTEGER;
+    minPrf INTEGER;
+BEGIN
+    newWiser := (SELECT cost FROM wiser WHERE target_router = NEW.target_router AND next_hop = NEW.next_hop);
+    IF (newWiser IS NULL) THEN
+        RAISE EXCEPTION 'Undefined Wiser cost from target router % to next hop %', NEW.target_router, NEW.next_hop;
+    END IF;
+
+    IF (array_position(NEW.as_path::int[], 2) > 0) THEN
+        SELECT max(local_preference) INTO minPrf FROM global_routing_information_base WHERE target_router = NEW.target_router AND prefix = NEW.prefix AND array_position(global_routing_information_base.as_path::int[], 2) > 0 AND (SELECT cost FROM wiser WHERE wiser.target_router = global_routing_information_base.target_router AND wiser.next_hop = global_routing_information_base.next_hop) > newWiser;
+
+        SELECT min(local_preference) INTO maxPrf FROM global_routing_information_base WHERE target_router = NEW.target_router AND prefix = NEW.prefix AND array_position(global_routing_information_base.as_path::int[], 2) > 0 AND (SELECT cost FROM wiser WHERE wiser.target_router = global_routing_information_base.target_router AND wiser.next_hop = global_routing_information_base.next_hop) < newWiser;
+
+        CASE ARRAY[minPrf IS NULL, maxPrf IS NULL]
+            WHEN ARRAY[TRUE, TRUE] THEN
+                minPrf := 0;
+                maxPrf := 32768;
+            WHEN ARRAY[TRUE, FALSE] THEN
+                minPrf := 0;
+            WHEN ARRAY[FALSE, TRUE] THEN
+                maxPrf := 32768;
+            WHEN ARRAY[FALSE, FALSE] THEN
+                /* Nothing to do */
+        END CASE;
+    ELSE
+        SELECT max(local_preference) INTO minPrf FROM global_routing_information_base WHERE target_router = NEW.target_router AND prefix = NEW.prefix AND array_position(NEW.as_path::int[], 2) IS NULL AND (SELECT cost FROM wiser WHERE wiser.target_router = global_routing_information_base.target_router AND wiser.next_hop = global_routing_information_base.next_hop) > newWiser;
+
+        SELECT min(local_preference) INTO maxPrf FROM global_routing_information_base WHERE target_router = NEW.target_router AND prefix = NEW.prefix AND array_position(NEW.as_path::int[], 2) IS NULL AND (SELECT cost FROM wiser WHERE wiser.target_router = global_routing_information_base.target_router AND wiser.next_hop = global_routing_information_base.next_hop) < newWiser;
+
+        CASE ARRAY[minPrf IS NULL, maxPrf IS NULL]
+            WHEN ARRAY[TRUE, TRUE] THEN
+                minPrf := 32768;
+                maxPrf := 65536;
+            WHEN ARRAY[TRUE, FALSE] THEN
+                minPrf := 32768;
+            WHEN ARRAY[FALSE, TRUE] THEN
+                maxPrf := 65536;
+            WHEN ARRAY[FALSE, FALSE] THEN
+                /* Nothing to do */
+        END CASE;
+    END IF;
+    newPrf := (minPrf + maxPrf)/2;
+    IF (newPrf > minPrf) AND (newPrf < maxPrf) THEN
+        NEW.local_preference = newPrf;
+    ELSE
+        RAISE EXCEPTION 'Run out of local preference value for Wiser policy!';
+    END IF;
+    RETURN NEW;
+END;
+$$
+LANGUAGE PLPGSQL;
 
 DROP FUNCTION IF EXISTS apply_policy();
 CREATE FUNCTION apply_policy() RETURNS TRIGGER AS
@@ -446,7 +414,7 @@ AS $$
     handler = urllib.request.HTTPBasicAuthHandler(passwdmgr)
     opener = urllib.request.build_opener(handler)
     try:
-        res = json.loads(opener.open(request, timeout=1).read())
+        res = json.loads(opener.open(request, timeout=0.1).read())
         plpy.notice("announcement returns: {}".format(res))
     except Exception as e:
         plpy.notice("Announcement prefix {} to router {} failed: {}".format(TD["new"]["prefix"], TD["new"]["target_router"], str(e)))
@@ -490,7 +458,7 @@ AS $$
     handler = urllib.request.HTTPBasicAuthHandler(passwdmgr)
     opener = urllib.request.build_opener(handler)
     try:
-        res = json.loads(opener.open(request, timeout=1).read())
+        res = json.loads(opener.open(request, timeout=0.1).read())
         plpy.notice("withdraw_route returns: {}".format(res))
     except Exception as e:
         plpy.notice("Withdraw prefix {} from router {} failed: {}".format(TD["old"]["prefix"], TD["old"]["target_router"], str(e)))
