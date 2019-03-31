@@ -3,7 +3,7 @@ import os
 from time import sleep
 import subprocess
 table = sys.argv[1]
-sql = "select * from {}".format(table)
+sql = "select * from {} order by rid asc".format(table)
 os.environ['PGPASSWORD'] = 'bolero'
 out = ""
 while (True):
@@ -14,7 +14,7 @@ while (True):
         'psql', '-P', 'pager', '-a', '-U', 'bolero', '--host=localhost', '-c',
         sql
     ])
-    #os.system(
+    # os.system(
     #    'PGPASSWORD=bolero psql -P pager --echo-all -U bolero --host=localhost -c "{}"'
     #    .format(sql))
 
