@@ -72,13 +72,13 @@ class SimpleTopo(Topo):
          BGP_agent) = ('R11', 'R12', 'R21', 'R22', 'R31', 'R32', 'R33',
                        'controller', 'BGP_agent')
         self.dpidDict = {
-            R11: "1",
-            R12: "2",
-            R21: "3",
-            R22: "4",
-            R31: "5",
-            R32: "6",
-            R33: "7",
+            R11: "4",
+            R12: "5",
+            R21: "6",
+            R22: "7",
+            R31: "1",
+            R32: "2",
+            R33: "3",
             controller: "8",
             BGP_agent: "9"
         }
@@ -241,10 +241,11 @@ def genOspfdConf(topo):
 def main():
     os.system("rm -f /tmp/R*.log /tmp/R*.pid log/*")
     os.system("mn -c >/dev/null 2>&1")
-    os.system("killall -9 zebra bgpd > /dev/null 2>&1")
+    os.system("killall -9 zebra ospfd bgpd > /dev/null 2>&1")
+    os.system('PGPASSWORD=bolero psql -U bolero --host=localhost -f demo.sql > /dev/null 2>&1')
     topo = SimpleTopo()
     genZebraConf(topo)
-    # genOspfdConf(topo)
+    genOspfdConf(topo)
     genBgpdConf(topo)
     net = Mininet(topo=topo, switch=Router, controller=None)
     net.start()
@@ -279,14 +280,11 @@ def main():
 
     for router in net.switches:
         if router.name in topo.quagga:
-            router.cmd(
-                "/home/zhijia/quagga-etc/sbin/zebra -f conf/{0}-zebra.conf -d -i /tmp/{0}-zebra.pid > log/{0}-zebra.log 2>&1"
-                .format(router.name),
-                shell=True)
-            router.waitOutput()
-            # router.cmd("/home/zhijia/quagga-etc/sbin/ospfd -f conf/{0}-ospfd.conf -d -i /tmp/{0}-ospfd.pid > log/{0}-ospfd.log 2>&1".format(router.name), shell=True)
-            # router.waitOutput()
             if topo.routerASDict[router.name] == 3:
+                router.cmd("/home/zhijia/quagga-etc/sbin/zebra -f conf/{0}-zebra.conf -d -i /tmp/{0}-zebra.pid > log/{0}-zebra.log 2>&1".format(router.name), shell=True)
+                router.waitOutput()
+                router.cmd("/home/zhijia/quagga-etc/sbin/ospfd -f conf/{0}-ospfd.conf -d -i /tmp/{0}-ospfd.pid > log/{0}-ospfd.log 2>&1".format(router.name), shell=True)
+                router.waitOutput()
                 router.cmd("/home/zhijia/quagga-etc/sbin/bgpd -f conf/{0}-bgpd.conf -d -i /tmp/{0}-bgp.pid > log/{0}-bgpd.log 2>&1".format(router.name), shell=True)
                 router.waitOutput()
                 bgpdConnCmd = 'xterm -T "{}" -e python2 telnet.py {}'.format(router.name, topo.bgpdTelnetAddress[router.name])
@@ -297,6 +295,10 @@ def main():
                     stdout=subprocess.PIPE)
                 xterms.append(p)
             else:
+                router.cmd("/usr/sbin/zebra -f conf/{0}-zebra.conf -d -i /tmp/{0}-zebra.pid > log/{0}-zebra.log 2>&1".format(router.name), shell=True)
+                router.waitOutput()
+                router.cmd("/usr/sbin/ospfd -f conf/{0}-ospfd.conf -d -i /tmp/{0}-ospfd.pid > log/{0}-ospfd.log 2>&1".format(router.name), shell=True)
+                router.waitOutput()
                 router.cmd(
                     "/usr/sbin/bgpd -f conf/{0}-bgpd.conf -d -i /tmp/{0}-bgp.pid > log/{0}-bgpd.log 2>&1".format(router.name), shell=True)
                 router.waitOutput()
@@ -317,11 +319,11 @@ def main():
         xterms.append(p)
 
     CLI(net)
-    for r in topo.quagga:
+    for r in [r for r in topo.quagga if topo.routerASDict[r] == 3]:
         os.system("wmctrl -lp | awk '/{}/{{print $3}}' | xargs kill".format(r))
     for t in tables:
         os.system("wmctrl -lp | awk '/{}/{{print $3}}' | xargs kill".format(t))
-    os.system('killall -2 zebra bgpd')
+    os.system('killall -2 zebra bgpd ospfd')
     net.stop()
 
 

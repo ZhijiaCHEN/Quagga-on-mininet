@@ -6,7 +6,7 @@ CREATE TABLE rib_in(
     metric INTEGER DEFAULT 0,
     next_hop VARCHAR,
     as_path INTEGER[],
-    local_router VARCHAR,
+    source_router VARCHAR,
     remote_router VARCHAR
 );
 
@@ -44,7 +44,7 @@ CREATE TABLE routers(
     api_address VARCHAR,
     api_port VARCHAR
 );
-INSERT INTO routers VALUES ('103.0.0.1', '103.0.0.10', 8801), ('103.0.0.2', '103.0.0.14', 8801), ('103.0.0.3', '103.0.0.18', 8801);
+/*INSERT INTO routers VALUES ('103.0.0.1', '103.0.0.10', 8801), ('103.0.0.2', '103.0.0.14', 8801), ('103.0.0.3', '103.0.0.18', 8801);*/
 
 DROP TABLE IF EXISTS border CASCADE;
 CREATE TABLE border(
@@ -130,7 +130,7 @@ DECLARE
 BEGIN
     /* FIX ME use join to improve performance */
     FOR router IN SELECT id FROM routers LOOP
-        cost := (SELECT igp_cost.cost FROM igp_cost WHERE source_router = router AND destination_router = NEW.local_router);
+        cost := (SELECT igp_cost.cost FROM igp_cost WHERE source_router = NEW.source_router AND destination_router = router);
         IF cost IS NULL THEN
             cost := 0;
         END IF;
@@ -138,7 +138,7 @@ BEGIN
         IF (NEW.local_preference = 0) OR (NEW.local_preference IS NULL) THEN
             NEW.local_preference := 100;
         END IF;
-        INSERT INTO global_routing_information_base(source_router, target_router, rid, prefix, local_preference, metric, next_hop, as_path, igp_cost) VALUES (NEW.local_router, router, NEW.rid, NEW.prefix, NEW.local_preference, NEW.metric, NEW.next_hop, NEW.as_path, cost);
+        INSERT INTO global_routing_information_base(source_router, target_router, rid, prefix, local_preference, metric, next_hop, as_path, igp_cost) VALUES (NEW.source_router, router, NEW.rid, NEW.prefix, NEW.local_preference, NEW.metric, NEW.next_hop, NEW.as_path, cost);
     END LOOP;
     RETURN NEW;
 END;
@@ -414,7 +414,7 @@ AS $$
     handler = urllib.request.HTTPBasicAuthHandler(passwdmgr)
     opener = urllib.request.build_opener(handler)
     try:
-        res = json.loads(opener.open(request, timeout=0.1).read())
+        res = json.loads(opener.open(request, timeout=3).read())
         plpy.notice("announcement returns: {}".format(res))
     except Exception as e:
         plpy.notice("Announcement prefix {} to router {} failed: {}".format(TD["new"]["prefix"], TD["new"]["target_router"], str(e)))
@@ -458,7 +458,7 @@ AS $$
     handler = urllib.request.HTTPBasicAuthHandler(passwdmgr)
     opener = urllib.request.build_opener(handler)
     try:
-        res = json.loads(opener.open(request, timeout=0.1).read())
+        res = json.loads(opener.open(request, timeout=3).read())
         plpy.notice("withdraw_route returns: {}".format(res))
     except Exception as e:
         plpy.notice("Withdraw prefix {} from router {} failed: {}".format(TD["old"]["prefix"], TD["old"]["target_router"], str(e)))
