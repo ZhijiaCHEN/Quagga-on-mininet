@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 import json
 import os
-from sys import stdin, stdout
+from sys import stdin, stdout, argv
 
-f = open('bgp_message.txt', 'w')
+f = open('log/{}'.format(argv[1]), 'w')
 
 def message_parser(line):
     # Parse JSON string  to dictionary
@@ -53,7 +53,7 @@ while True:
             f.write(str(message))
  
     except KeyboardInterrupt:
-        pass
+        f.close()
     except IOError:
         # most likely a signal during readline
-        pass
+        f.close()

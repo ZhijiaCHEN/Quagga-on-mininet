@@ -20,6 +20,7 @@ import subprocess
 
 setLogLevel('info')
 
+quaggaPath = '/usr/sbin/'
 
 def log(s, col="green"):
     print T.colored(s, col)
@@ -211,10 +212,6 @@ def genBgpdConf(topo):
             f.write(
                 "  neighbor {0} remote-as {1}\n  neighbor {0} next-hop-self\n  neighbor {0} timers 5 5\n\n"
                 .format(remoteAddress, remoteAS))
-            if nRouter == "controller":  # Bolero communicates with quagga routers through R4
-                boleroInfo = "bolero address {}\nbolero port 5432\nbolero user bolero\nbolero password bolero\nbolero\n\n".format(
-                    remoteAddress)
-        f.write(boleroInfo)
         f.write(
             "debug bgp as4\ndebug bgp events\ndebug bgp filters\ndebug bgp fsm\ndebug bgp keepalives\ndebug bgp updates\n\nlog file /tmp/{}-bgpd.log\n\n"
             .format(router))
@@ -239,29 +236,45 @@ def genOspfdConf(topo):
         f.close()
 
 def genExaBGPConf(topo):
-    localIntf = f'{topo.bgpController}-eth1'
-    localAS = topo.routerASDict[topo.bgpController]
-    localAddress = topo.intfIPDict[localIntf]
-    remoteAS = []
-    remoteAddress = []
+    conf = """
+process bgp-log {{
+    run /usr/bin/python3 /home/zhijia/git/Quagga-on-mininet/Bolero/bgp_message.py {logFile};
+    encoder json;
+}}
+
+neighbor {remoteAddress} {{
+    router-id {localAddress};
+    local-address {localAddress};
+    local-as {localAS};
+    peer-as {remoteAS};
+    api {{
+        processes [bgp-log];
+    }}
+}}
+"""
     for i in range(topo.routerIntfCntDict[topo.bgpController]):
-        intf = "{}-eth{}".format(router.name, i + 1)
-        if intf not in topo.linkEndDict:
+        localIntf = "{}-eth{}".format(topo.bgpController, i + 1)
+        localAS = topo.routerASDict[topo.bgpController]
+        localAddress = topo.intfIPDict[localIntf]
+        if localIntf not in topo.linkEndDict:
             continue
-        nIntf = topo.linkEndDict[intf]
+        nIntf = topo.linkEndDict[localIntf]
         nRouter = nIntf.split('-')[0]
-        remoteAS.append(topo.routerASDict[nRouter])
-        remoteAddress.append(topo.intfIPDict[nIntf])
+        remoteAS = topo.routerASDict[nRouter]
+        remoteAddress = topo.intfIPDict[nIntf]
+        f = open("conf/{}-exabgp.conf".format(localIntf), 'w')
+        f.write(conf.format(logFile=localIntf+"-exabgp.log", remoteAddress=remoteAddress, localAddress=localAddress, localAS=localAS, remoteAS=remoteAS))
+        f.close()
 
 def main():
     os.system("rm -f /tmp/R*.log /tmp/R*.pid log/*")
     os.system("mn -c >/dev/null 2>&1")
     os.system("killall -9 zebra ospfd bgpd > /dev/null 2>&1")
-    os.system('PGPASSWORD=bolero psql -U bolero --host=localhost -f demo.sql > /dev/null 2>&1')
     topo = SimpleTopo()
     genZebraConf(topo)
     genOspfdConf(topo)
     genBgpdConf(topo)
+    genExaBGPConf(topo)
     net = Mininet(topo=topo, switch=Router, controller=None)
     net.start()
     for router in net.switches:
@@ -286,7 +299,7 @@ def main():
                 remoteAddress = topo.intfIPDict[nIntf]
                 router.cmd("ifconfig {} {}/30".format(intf, localAddress))
                 router.cmd(
-                    '/home/zhijia/miniconda3/bin/python /home/zhijia/git/yabgp/bin/yabgpd --bgp-local_addr={0} --bgp-local_as={1} --bgp-remote_addr={2} --bgp-remote_as={3} --rest-bind_host={0}  2>/home/zhijia/git/Quagga-on-mininet/Bolero/yabgp-api-{4}.log &'
+                    '/home/zhijia/miniconda3/bin/python /home/zhijia/git/yabgp/bin/yabgpd --bgp-local_addr={0} --bgp-local_as={1} --bgp-remote_addr={2} --bgp-remote_as={3} --rest-bind_host={0}  2>/home/zhijia/git/Quagga-on-mininet/Bolero/log/yabgp-api-{4}.log &'
                     .format(localAddress, localAS, remoteAddress, remoteAS,
                             router.name))
         elif router.name == topo.bgpController:
@@ -294,21 +307,20 @@ def main():
                 intf = "{}-eth{}".format(router.name, i + 1)
                 localAddress = topo.intfIPDict[intf]
                 router.cmd("ifconfig {} {}/30".format(intf, localAddress))
-            # TBD: start exabgp
-            pass
+            router.cmd("exabgp conf/{0}-exabgp.conf > log/{0}-exabgp.log 2>&1".format(intf))
 
     # all interfaces of bgp agent must be configured before starting quagga routers, otherwise quagga could not connect to Bolero
     xterms = []
 
     for router in net.switches:
         if router.name in topo.quagga:
+            router.cmd("{0}/zebra -f conf/{1}-zebra.conf -d -i /tmp/{1}-zebra.pid > log/{1}-zebra.log 2>&1".format(quaggaPath, router.name), shell=True)
+            router.waitOutput()
+            router.cmd("{0}/ospfd -f conf/{1}-ospfd.conf -d -i /tmp/{1}-ospfd.pid > log/{1}-ospfd.log 2>&1".format(quaggaPath, router.name), shell=True)
+            router.waitOutput()
+            router.cmd("{0}/bgpd -f conf/{1}-bgpd.conf -d -i /tmp/{1}-bgp.pid > log/{1}-bgpd.log 2>&1".format(quaggaPath, router.name), shell=True)
+            router.waitOutput()
             if topo.routerASDict[router.name] == 3:
-                router.cmd("/home/zhijia/quagga-etc/sbin/zebra -f conf/{0}-zebra.conf -d -i /tmp/{0}-zebra.pid > log/{0}-zebra.log 2>&1".format(router.name), shell=True)
-                router.waitOutput()
-                router.cmd("/home/zhijia/quagga-etc/sbin/ospfd -f conf/{0}-ospfd.conf -d -i /tmp/{0}-ospfd.pid > log/{0}-ospfd.log 2>&1".format(router.name), shell=True)
-                router.waitOutput()
-                router.cmd("/home/zhijia/quagga-etc/sbin/bgpd -f conf/{0}-bgpd.conf -d -i /tmp/{0}-bgp.pid > log/{0}-bgpd.log 2>&1".format(router.name), shell=True)
-                router.waitOutput()
                 bgpdConnCmd = 'xterm -T "{}" -e python2 telnet.py {}'.format(router.name, topo.bgpdTelnetAddress[router.name])
                 p = subprocess.Popen(
                     bgpdConnCmd,
@@ -316,35 +328,35 @@ def main():
                     stdin=subprocess.PIPE,
                     stdout=subprocess.PIPE)
                 xterms.append(p)
-            else:
-                router.cmd("/usr/sbin/zebra -f conf/{0}-zebra.conf -d -i /tmp/{0}-zebra.pid > log/{0}-zebra.log 2>&1".format(router.name), shell=True)
-                router.waitOutput()
-                router.cmd("/usr/sbin/ospfd -f conf/{0}-ospfd.conf -d -i /tmp/{0}-ospfd.pid > log/{0}-ospfd.log 2>&1".format(router.name), shell=True)
-                router.waitOutput()
-                router.cmd(
+            #else:
+            #    router.cmd("/usr/sbin/zebra -f conf/{0}-zebra.conf -d -i /tmp/{0}-zebra.pid > log/{0}-zebra.log 2>&1".format(router.name), shell=True)
+            #    router.waitOutput()
+            #    router.cmd("/usr/sbin/ospfd -f conf/{0}-ospfd.conf -d -i /tmp/{0}-ospfd.pid > log/{0}-ospfd.log 2>&1".format(router.name), shell=True)
+            #    router.waitOutput()
+            #    router.cmd(
                     "/usr/sbin/bgpd -f conf/{0}-bgpd.conf -d -i /tmp/{0}-bgp.pid > log/{0}-bgpd.log 2>&1".format(router.name), shell=True)
-                router.waitOutput()
+            #    router.waitOutput()
 
             # log("Starting zebra ospfd, bgpd on {}".format(router.name))
 
     # for host in net.hosts:
     #    host.cmd("ifconfig {}-eth0 {}".format(host.name, getHostIP(host.name)))
     #    host.cmd("route add default gw {}".format(getGateway(host.name)))
-    tables = ['global_routing_information_base']
-    for t in tables:
-        xtermCmd = 'xterm -T "{0}" -e python watch_table.py {0}'.format(t)
-        p = subprocess.Popen(
-            xtermCmd,
-            shell=True,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE)
-        xterms.append(p)
+    #tables = ['global_routing_information_base']
+    #for t in tables:
+    #    xtermCmd = 'xterm -T "{0}" -e python watch_table.py {0}'.format(t)
+    #    p = subprocess.Popen(
+    #        xtermCmd,
+    #        shell=True,
+    #        stdin=subprocess.PIPE,
+    #        stdout=subprocess.PIPE)
+    #    xterms.append(p)
 
     CLI(net)
     for r in [r for r in topo.quagga if topo.routerASDict[r] == 3]:
         os.system("wmctrl -lp | awk '/{}/{{print $3}}' | xargs kill".format(r))
-    for t in tables:
-        os.system("wmctrl -lp | awk '/{}/{{print $3}}' | xargs kill".format(t))
+    #for t in tables:
+    #    os.system("wmctrl -lp | awk '/{}/{{print $3}}' | xargs kill".format(t))
     os.system('killall -2 zebra bgpd ospfd')
     net.stop()
 
