@@ -83,8 +83,9 @@ class SimpleTopo(Topo):
             BGP_agent: "9"
         }
         self.quagga = [R11, R12, R21, R22, R31, R32, R33]
-        self.bgpAgent = [controller, BGP_agent]
-        self.routers = self.quagga + self.bgpAgent
+        self.bgpAgent = BGP_agent
+        self.bgpController = controller
+        self.routers = self.quagga + [self.bgpAgent, self.bgpController]
         for r in self.routers:
             if r in self.quagga:
                 self.addSwitch(r, dpid=self.dpidDict[r])
@@ -237,6 +238,20 @@ def genOspfdConf(topo):
             .format(router))
         f.close()
 
+def genExaBGPConf(topo):
+    localIntf = f'{topo.bgpController}-eth1'
+    localAS = topo.routerASDict[topo.bgpController]
+    localAddress = topo.intfIPDict[localIntf]
+    remoteAS = []
+    remoteAddress = []
+    for i in range(topo.routerIntfCntDict[topo.bgpController]):
+        intf = "{}-eth{}".format(router.name, i + 1)
+        if intf not in topo.linkEndDict:
+            continue
+        nIntf = topo.linkEndDict[intf]
+        nRouter = nIntf.split('-')[0]
+        remoteAS.append(topo.routerASDict[nRouter])
+        remoteAddress.append(topo.intfIPDict[nIntf])
 
 def main():
     os.system("rm -f /tmp/R*.log /tmp/R*.pid log/*")
@@ -257,7 +272,7 @@ def main():
     sleep(3)
 
     for router in net.switches:
-        if router.name in topo.bgpAgent:
+        if router.name == topo.bgpAgent:
             # router for routes injection
             for i in range(topo.routerIntfCntDict[router.name]):
                 intf = "{}-eth{}".format(router.name, i + 1)
@@ -274,6 +289,13 @@ def main():
                     '/home/zhijia/miniconda3/bin/python /home/zhijia/git/yabgp/bin/yabgpd --bgp-local_addr={0} --bgp-local_as={1} --bgp-remote_addr={2} --bgp-remote_as={3} --rest-bind_host={0}  2>/home/zhijia/git/Quagga-on-mininet/Bolero/yabgp-api-{4}.log &'
                     .format(localAddress, localAS, remoteAddress, remoteAS,
                             router.name))
+        elif router.name == topo.bgpController:
+            for i in range(topo.routerIntfCntDict[router.name]):
+                intf = "{}-eth{}".format(router.name, i + 1)
+                localAddress = topo.intfIPDict[intf]
+                router.cmd("ifconfig {} {}/30".format(intf, localAddress))
+            # TBD: start exabgp
+            pass
 
     # all interfaces of bgp agent must be configured before starting quagga routers, otherwise quagga could not connect to Bolero
     xterms = []
