@@ -20,7 +20,7 @@ import subprocess
 
 setLogLevel('info')
 
-quaggaPath = '/usr/sbin/'
+quaggaPath = '/home/zhijia/frr/lib/frr'
 
 def log(s, col="green"):
     print T.colored(s, col)
@@ -115,7 +115,7 @@ class SimpleTopo(Topo):
                 self.bgpConnDict[l[1]] = []
             if (l[0] not in self.quagga) or (l[1] not in self.quagga) or (
                     self.routerASDict[l[0]] != self.routerASDict[l[1]]
-            ):  # In Bolero setup, every router has one and only one iBGP session which is with Bolero
+            ):  # Within the same AS, BGP connection only exists between a quagga router and the bgp controller or between a quagga router and the bgp agent
                 self.bgpConnDict[l[0]].append(l[1])
                 self.bgpConnDict[l[1]].append(l[0])
             n1 = self.getIntfName(l[0])
@@ -198,7 +198,6 @@ def genBgpdConf(topo):
         f.write(
             "! -*- bgp -*-\nhostname {0}\npassword en\nenable password en\n\nrouter bgp {1}\n  bgp router-id {2}.0.0.{3}\n  !network {2}.{3}.0.0/16\n!redistribute ospf\n\n"
             .format(router, localAS, localAS + 100, idx))
-        boleroInfo = ""
         for i in range(topo.routerIntfCntDict[router]):
             intf = "{}-eth{}".format(router, i + 1)
             if intf not in topo.linkEndDict:
@@ -216,7 +215,6 @@ def genBgpdConf(topo):
             "debug bgp as4\ndebug bgp events\ndebug bgp filters\ndebug bgp fsm\ndebug bgp keepalives\ndebug bgp updates\n\nlog file /tmp/{}-bgpd.log\n\n"
             .format(router))
         f.close()
-
 
 def genOspfdConf(topo):
     for router in topo.quagga:
@@ -333,8 +331,7 @@ def main():
             #    router.waitOutput()
             #    router.cmd("/usr/sbin/ospfd -f conf/{0}-ospfd.conf -d -i /tmp/{0}-ospfd.pid > log/{0}-ospfd.log 2>&1".format(router.name), shell=True)
             #    router.waitOutput()
-            #    router.cmd(
-                    "/usr/sbin/bgpd -f conf/{0}-bgpd.conf -d -i /tmp/{0}-bgp.pid > log/{0}-bgpd.log 2>&1".format(router.name), shell=True)
+            #    router.cmd("/usr/sbin/bgpd -f conf/{0}-bgpd.conf -d -i /tmp/{0}-bgp.pid > log/{0}-bgpd.log 2>&1".format(router.name), shell=True)
             #    router.waitOutput()
 
             # log("Starting zebra ospfd, bgpd on {}".format(router.name))
