@@ -20,7 +20,7 @@ import subprocess
 
 setLogLevel('info')
 
-quaggaPath = '/usr/sbin/'
+quaggaPath = '/home/zhijia/frr/sbin'
 
 def log(s, col="green"):
     print T.colored(s, col)
@@ -115,7 +115,7 @@ class SimpleTopo(Topo):
                 self.bgpConnDict[l[1]] = []
             if (l[0] not in self.quagga) or (l[1] not in self.quagga) or (
                     self.routerASDict[l[0]] != self.routerASDict[l[1]]
-            ):  # In Bolero setup, every router has one and only one iBGP session which is with Bolero
+            ):  # Within the same AS, BGP connection only exists between a quagga router and the bgp controller or between a quagga router and the bgp agent
                 self.bgpConnDict[l[0]].append(l[1])
                 self.bgpConnDict[l[1]].append(l[0])
             n1 = self.getIntfName(l[0])
@@ -180,7 +180,7 @@ log file /tmp/{}-zebra.log
 """
 
     for router in topo.quagga:
-        intfConfStr = "interface lo\n  ip address 127.0.0.1/32\n"
+        intfConfStr = "!interface lo\n  ip address 127.0.0.1/32\n" #
         for i in range(topo.routerIntfCntDict[router]):
             intf = "{}-eth{}".format(router, i + 1)
             intfConfStr += "interface {}\n  ip address {}/30\n".format(
@@ -198,7 +198,6 @@ def genBgpdConf(topo):
         f.write(
             "! -*- bgp -*-\nhostname {0}\npassword en\nenable password en\n\nrouter bgp {1}\n  bgp router-id {2}.0.0.{3}\n  !network {2}.{3}.0.0/16\n!redistribute ospf\n\n"
             .format(router, localAS, localAS + 100, idx))
-        boleroInfo = ""
         for i in range(topo.routerIntfCntDict[router]):
             intf = "{}-eth{}".format(router, i + 1)
             if intf not in topo.linkEndDict:
@@ -216,7 +215,6 @@ def genBgpdConf(topo):
             "debug bgp as4\ndebug bgp events\ndebug bgp filters\ndebug bgp fsm\ndebug bgp keepalives\ndebug bgp updates\n\nlog file /tmp/{}-bgpd.log\n\n"
             .format(router))
         f.close()
-
 
 def genOspfdConf(topo):
     for router in topo.quagga:
@@ -301,7 +299,7 @@ def main():
                 router.cmd(
                     '/home/zhijia/miniconda3/bin/python /home/zhijia/git/yabgp/bin/yabgpd --bgp-local_addr={0} --bgp-local_as={1} --bgp-remote_addr={2} --bgp-remote_as={3} --rest-bind_host={0}  2>/home/zhijia/git/Quagga-on-mininet/Bolero/log/yabgp-api-{4}.log &'
                     .format(localAddress, localAS, remoteAddress, remoteAS,
-                            router.name))
+                            intf))
         elif router.name == topo.bgpController:
             for i in range(topo.routerIntfCntDict[router.name]):
                 intf = "{}-eth{}".format(router.name, i + 1)
@@ -314,6 +312,7 @@ def main():
 
     for router in net.switches:
         if router.name in topo.quagga:
+            router.cmd("ifconfig lo 127.0.0.1/32") #somehow frr is not willing to configure the lo interface using the address 127.0.0.1/32
             router.cmd("{0}/zebra -f conf/{1}-zebra.conf -d -i /tmp/{1}-zebra.pid > log/{1}-zebra.log 2>&1".format(quaggaPath, router.name), shell=True)
             router.waitOutput()
             router.cmd("{0}/ospfd -f conf/{1}-ospfd.conf -d -i /tmp/{1}-ospfd.pid > log/{1}-ospfd.log 2>&1".format(quaggaPath, router.name), shell=True)
@@ -333,8 +332,7 @@ def main():
             #    router.waitOutput()
             #    router.cmd("/usr/sbin/ospfd -f conf/{0}-ospfd.conf -d -i /tmp/{0}-ospfd.pid > log/{0}-ospfd.log 2>&1".format(router.name), shell=True)
             #    router.waitOutput()
-            #    router.cmd(
-                    "/usr/sbin/bgpd -f conf/{0}-bgpd.conf -d -i /tmp/{0}-bgp.pid > log/{0}-bgpd.log 2>&1".format(router.name), shell=True)
+            #    router.cmd("/usr/sbin/bgpd -f conf/{0}-bgpd.conf -d -i /tmp/{0}-bgp.pid > log/{0}-bgpd.log 2>&1".format(router.name), shell=True)
             #    router.waitOutput()
 
             # log("Starting zebra ospfd, bgpd on {}".format(router.name))
