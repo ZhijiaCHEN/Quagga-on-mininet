@@ -2,8 +2,8 @@
 import json
 import os
 from sys import stdin, stdout, argv
-
-f = open('log/{}'.format(argv[1]), 'w')
+pyPath = os.path.dirname(os.path.abspath(__file__))
+f = open(os.path.join(pyPath, 'log/{}'.format(argv[1])), 'w')
 
 def message_parser(line):
     # Parse JSON string  to dictionary
@@ -33,16 +33,23 @@ def message_parser(line):
  
     # If message is a different type, ignore
     return None
- 
+
+
 counter = 0
 while True:
     try:
+        f.write('I am going to read a line...\n')
+        f.flush()
         line = stdin.readline().strip()
+        f.write('I got a line...\n')
+        f.flush()
         
         # When the parent dies we are seeing continual newlines, so we only access so many before stopping
         if line == "":
             counter += 1
             if counter > 100:
+                f.write('get too much newline, breaking out...\n')
+                f.flush()
                 break
             continue
         counter = 0
@@ -51,9 +58,16 @@ while True:
         message = message_parser(line)
         if message:
             f.write(str(message))
+        else:
+            f.write('unrecognized message type: {}\n'.format(line))
+        f.flush()
  
     except KeyboardInterrupt:
+        f.write('close on KeyboardInterrupt\n')
         f.close()
     except IOError:
         # most likely a signal during readline
+        f.write('close on IOError\n')
         f.close()
+f.write('close on finishing the loop\n')
+f.close()

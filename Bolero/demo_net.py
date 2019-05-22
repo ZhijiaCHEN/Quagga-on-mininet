@@ -212,7 +212,7 @@ def genBgpdConf(topo):
                 "  neighbor {0} remote-as {1}\n  neighbor {0} next-hop-self\n  neighbor {0} timers 5 5\n\n"
                 .format(remoteAddress, remoteAS))
         f.write(
-            "debug bgp as4\ndebug bgp events\ndebug bgp filters\ndebug bgp fsm\ndebug bgp keepalives\ndebug bgp updates\n\nlog file /tmp/{}-bgpd.log\n\n"
+            "debug bgp as4\n!debug bgp events\n!debug bgp filters\n!debug bgp fsm\n!debug bgp keepalives\ndebug bgp updates\n\nlog file /tmp/{}-bgpd.log\n\n"
             .format(router))
         f.close()
 
@@ -235,8 +235,13 @@ def genOspfdConf(topo):
 
 def genExaBGPConf(topo):
     conf = """
-process bgp-log {{
-    run /usr/bin/python3 /home/zhijia/git/Quagga-on-mininet/Bolero/bgp_message.py {logFile};
+process receive-bgp {{
+    run /usr/bin/python3 /home/zhijia/git/Quagga-on-mininet/Bolero/receive_bgp_message.py {logFile};
+    encoder json;
+}}
+
+process send-bgp {{
+    run /usr/bin/python3 /home/zhijia/git/Quagga-on-mininet/Bolero/send_bgp_message.py {localAddress};
     encoder json;
 }}
 
@@ -246,7 +251,11 @@ neighbor {remoteAddress} {{
     local-as {localAS};
     peer-as {remoteAS};
     api {{
-        processes [bgp-log];
+        processes [receive-bgp send-bgp];
+        receive {{
+            parsed;
+            update;
+        }}
     }}
 }}
 """
@@ -261,7 +270,7 @@ neighbor {remoteAddress} {{
         remoteAS = topo.routerASDict[nRouter]
         remoteAddress = topo.intfIPDict[nIntf]
         f = open("conf/{}-exabgp.conf".format(localIntf), 'w')
-        f.write(conf.format(logFile=localIntf+"-exabgp.log", remoteAddress=remoteAddress, localAddress=localAddress, localAS=localAS, remoteAS=remoteAS))
+        f.write(conf.format(logFile=localIntf+"-bgp.log", remoteAddress=remoteAddress, localAddress=localAddress, localAS=localAS, remoteAS=remoteAS))
         f.close()
 
 def main():
@@ -305,10 +314,9 @@ def main():
                 intf = "{}-eth{}".format(router.name, i + 1)
                 localAddress = topo.intfIPDict[intf]
                 router.cmd("ifconfig {} {}/30".format(intf, localAddress))
-            router.cmd("exabgp conf/{0}-exabgp.conf > log/{0}-exabgp.log 2>&1".format(intf))
+                router.cmd("/home/zhijia/.local/bin/exabgp conf/{0}-exabgp.conf --debug > log/{0}-exabgp.log 2>&1 &".format(intf))
 
-    # all interfaces of bgp agent must be configured before starting quagga routers, otherwise quagga could not connect to Bolero
-    xterms = []
+    # all interfaces of bgp agent must be configured before starting quagga routers
 
     for router in net.switches:
         if router.name in topo.quagga:
@@ -326,7 +334,6 @@ def main():
                     shell=True,
                     stdin=subprocess.PIPE,
                     stdout=subprocess.PIPE)
-                xterms.append(p)
             #else:
             #    router.cmd("/usr/sbin/zebra -f conf/{0}-zebra.conf -d -i /tmp/{0}-zebra.pid > log/{0}-zebra.log 2>&1".format(router.name), shell=True)
             #    router.waitOutput()
@@ -348,7 +355,6 @@ def main():
     #        shell=True,
     #        stdin=subprocess.PIPE,
     #        stdout=subprocess.PIPE)
-    #    xterms.append(p)
 
     CLI(net)
     for r in [r for r in topo.quagga if topo.routerASDict[r] == 3]:
