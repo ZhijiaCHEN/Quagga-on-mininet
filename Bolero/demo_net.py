@@ -86,6 +86,7 @@ class SimpleTopo(Topo):
         self.quagga = [R11, R12, R21, R22, R31, R32, R33]
         self.bgpAgent = BGP_agent
         self.bgpController = controller
+        self.exabgp = [self.bgpAgent, self.bgpController]
         self.routers = self.quagga + [self.bgpAgent, self.bgpController]
         for r in self.routers:
             if r in self.quagga:
@@ -241,7 +242,7 @@ process receive-bgp {{
 }}
 
 process send-bgp {{
-    run /usr/bin/python3 /home/zhijia/git/Quagga-on-mininet/Bolero/send_bgp_message.py {localAddress};
+    run /usr/bin/python3 /home/zhijia/git/Quagga-on-mininet/Bolero/send_bgp_message.py {route} {localAddress};
     encoder json;
 }}
 
@@ -259,19 +260,20 @@ neighbor {remoteAddress} {{
     }}
 }}
 """
-    for i in range(topo.routerIntfCntDict[topo.bgpController]):
-        localIntf = "{}-eth{}".format(topo.bgpController, i + 1)
-        localAS = topo.routerASDict[topo.bgpController]
-        localAddress = topo.intfIPDict[localIntf]
-        if localIntf not in topo.linkEndDict:
-            continue
-        nIntf = topo.linkEndDict[localIntf]
-        nRouter = nIntf.split('-')[0]
-        remoteAS = topo.routerASDict[nRouter]
-        remoteAddress = topo.intfIPDict[nIntf]
-        f = open("conf/{}-exabgp.conf".format(localIntf), 'w')
-        f.write(conf.format(logFile=localIntf+"-bgp.log", remoteAddress=remoteAddress, localAddress=localAddress, localAS=localAS, remoteAS=remoteAS))
-        f.close()
+    for exabgp in [topo.bgpController, topo.bgpAgent]:
+        for i in range(topo.routerIntfCntDict[exabgp]):
+            localIntf = "{}-eth{}".format(exabgp, i + 1)
+            localAS = topo.routerASDict[exabgp]
+            localAddress = topo.intfIPDict[localIntf]
+            if localIntf not in topo.linkEndDict:
+                continue
+            nIntf = topo.linkEndDict[localIntf]
+            nRouter = nIntf.split('-')[0]
+            remoteAS = topo.routerASDict[nRouter]
+            remoteAddress = topo.intfIPDict[nIntf]
+            f = open("conf/{}-exabgp.conf".format(localIntf), 'w')
+            f.write(conf.format(logFile=localIntf+"-bgp.log", remoteAddress=remoteAddress, localAddress=localAddress, localAS=localAS, remoteAS=remoteAS, route = "{}.{}.0.0/16".format(100+localAS, i+1)))
+            f.close()
 
 def main():
     os.system("rm -f /tmp/R*.log /tmp/R*.pid log/*")
@@ -292,24 +294,7 @@ def main():
     sleep(3)
 
     for router in net.switches:
-        if router.name == topo.bgpAgent:
-            # router for routes injection
-            for i in range(topo.routerIntfCntDict[router.name]):
-                intf = "{}-eth{}".format(router.name, i + 1)
-                if intf not in topo.linkEndDict:
-                    continue
-                nIntf = topo.linkEndDict[intf]
-                nRouter = nIntf.split('-')[0]
-                localAS = topo.routerASDict[router.name]
-                localAddress = topo.intfIPDict[intf]
-                remoteAS = topo.routerASDict[nRouter]
-                remoteAddress = topo.intfIPDict[nIntf]
-                router.cmd("ifconfig {} {}/30".format(intf, localAddress))
-                router.cmd(
-                    '/home/zhijia/miniconda3/bin/python /home/zhijia/git/yabgp/bin/yabgpd --bgp-local_addr={0} --bgp-local_as={1} --bgp-remote_addr={2} --bgp-remote_as={3} --rest-bind_host={0}  2>/home/zhijia/git/Quagga-on-mininet/Bolero/log/yabgp-api-{4}.log &'
-                    .format(localAddress, localAS, remoteAddress, remoteAS,
-                            intf))
-        elif router.name == topo.bgpController:
+        if router.name in topo.exabgp:
             for i in range(topo.routerIntfCntDict[router.name]):
                 intf = "{}-eth{}".format(router.name, i + 1)
                 localAddress = topo.intfIPDict[intf]
