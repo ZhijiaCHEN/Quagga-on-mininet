@@ -210,7 +210,7 @@ def genBgpdConf(topo):
             remoteAS = topo.routerASDict[nRouter]
             remoteAddress = topo.intfIPDict[nIntf]
             f.write(
-                "  neighbor {0} remote-as {1}\n  neighbor {0} next-hop-self\n  neighbor {0} timers 5 5\n\n"
+                "  neighbor {0} remote-as {1}\n  neighbor {0} next-hop-self\n  neighbor {0} timers 5 5\n  neighbor {0} addpath-tx-all-paths\n\n"
                 .format(remoteAddress, remoteAS))
         f.write(
             "debug bgp as4\n!debug bgp events\n!debug bgp filters\n!debug bgp fsm\n!debug bgp keepalives\ndebug bgp updates\n\nlog file /tmp/{}-bgpd.log\n\n"
@@ -258,6 +258,15 @@ neighbor {remoteAddress} {{
             update;
         }}
     }}
+
+
+    capability {{
+        add-path send/receive;
+    }}
+
+    family {{
+        ipv4 unicast;
+    }}
 }}
 """
     for exabgp in [topo.bgpController, topo.bgpAgent]:
@@ -299,7 +308,7 @@ def main():
                 intf = "{}-eth{}".format(router.name, i + 1)
                 localAddress = topo.intfIPDict[intf]
                 router.cmd("ifconfig {} {}/30".format(intf, localAddress))
-                router.cmd("/home/zhijia/.local/bin/exabgp conf/{0}-exabgp.conf --debug > log/{0}-exabgp.log 2>&1 &".format(intf))
+                router.cmd("/home/zhijia/.local/bin/exabgp conf/{0}-exabgp.conf > log/{0}-exabgp.log 2>&1 &".format(intf))
 
     # all interfaces of bgp agent must be configured before starting quagga routers
 
