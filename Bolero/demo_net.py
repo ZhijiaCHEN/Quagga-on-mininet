@@ -14,17 +14,10 @@ from argparse import ArgumentParser
 
 import sys
 import os
-import termcolor as T
 import time
 import subprocess
 
-setLogLevel('info')
-
 quaggaPath = '/home/zhijia/frr/sbin'
-
-def log(s, col="green"):
-    print T.colored(s, col)
-
 
 class Router(Switch):
     """Defines a new router that is inside a network namespace so that the
@@ -52,8 +45,8 @@ class Router(Switch):
     def stop(self):
         self.deleteIntfs()
 
-    def log(self, s, col="magenta"):
-        print T.colored(s, col)
+    def log(self, s):
+        print(s)
 
 
 class SimpleTopo(Topo):
@@ -299,7 +292,7 @@ def main():
         router.cmd("sysctl -w net.ipv4.ip_forward=1")
         router.waitOutput()
 
-    log("Waiting 3 seconds for sysctl changes to take effect...")
+    print("Waiting 3 seconds for sysctl changes to take effect...")
     sleep(3)
 
     for router in net.switches:
