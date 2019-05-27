@@ -126,9 +126,9 @@ class SimpleTopo(Topo):
             self.addLink(l[0], l[1], intfName1=n1, intfName2=n2)
             (self.intfIPDict[n1], self.intfIPDict[n2]) = self.getIntfPairIP(
                 self.routerASDict[l[0]], self.routerASDict[l[1]])
-            if l[0] == controller:
+            if l[0] in [controller, BGP_agent]:
                 self.bgpdTelnetAddress[l[1]] = self.intfIPDict[n2]
-            if l[1] == controller:
+            if l[1] in [controller, BGP_agent]:
                 self.bgpdTelnetAddress[l[0]] = self.intfIPDict[n1]
             if l[0] in self.routerIntfCntDict:
                 self.routerIntfCntDict[l[0]] += 1
@@ -213,7 +213,7 @@ def genBgpdConf(topo):
                 "  neighbor {0} remote-as {1}\n  neighbor {0} next-hop-self\n  neighbor {0} timers 5 5\n  neighbor {0} addpath-tx-all-paths\n\n"
                 .format(remoteAddress, remoteAS))
         f.write(
-            "debug bgp as4\n!debug bgp events\n!debug bgp filters\n!debug bgp fsm\n!debug bgp keepalives\ndebug bgp updates\n\nlog file /tmp/{}-bgpd.log\n\n"
+            "!debug bgp neighbor-events\ndebug bgp updates\ndebug bgp bestpath 106.0.0.0/16\n\nlog file /tmp/{}-bgpd.log\n\n"
             .format(router))
         f.close()
 
@@ -242,7 +242,7 @@ process receive-bgp {{
 }}
 
 process send-bgp {{
-    run /usr/bin/python3 /home/zhijia/git/Quagga-on-mininet/Bolero/send_bgp_message.py {route} {localAddress};
+    run /usr/bin/python3 /home/zhijia/git/Quagga-on-mininet/Bolero/send_bgp_message.py {route} {localAddress} {i};
     encoder json;
 }}
 
@@ -281,7 +281,7 @@ neighbor {remoteAddress} {{
             remoteAS = topo.routerASDict[nRouter]
             remoteAddress = topo.intfIPDict[nIntf]
             f = open("conf/{}-exabgp.conf".format(localIntf), 'w')
-            f.write(conf.format(logFile=localIntf+"-bgp.log", remoteAddress=remoteAddress, localAddress=localAddress, localAS=localAS, remoteAS=remoteAS, route = "{}.{}.0.0/16".format(100+localAS, i+1)))
+            f.write(conf.format(logFile=localIntf+"-bgp.log", remoteAddress=remoteAddress, localAddress=localAddress, localAS=localAS, remoteAS=remoteAS, route = "{}.0.0.0/16".format(100+localAS), i = i))
             f.close()
 
 def main():
@@ -321,13 +321,13 @@ def main():
             router.waitOutput()
             router.cmd("{0}/bgpd -f conf/{1}-bgpd.conf -d -i /tmp/{1}-bgp.pid > log/{1}-bgpd.log 2>&1".format(quaggaPath, router.name), shell=True)
             router.waitOutput()
-            if topo.routerASDict[router.name] == 3:
-                bgpdConnCmd = 'xterm -T "{}" -e python2 telnet.py {}'.format(router.name, topo.bgpdTelnetAddress[router.name])
-                p = subprocess.Popen(
-                    bgpdConnCmd,
-                    shell=True,
-                    stdin=subprocess.PIPE,
-                    stdout=subprocess.PIPE)
+            #if topo.routerASDict[router.name] == 3:
+            bgpdConnCmd = 'xterm -T "{}" -e python2 telnet.py {}'.format(router.name, topo.bgpdTelnetAddress[router.name])
+            p = subprocess.Popen(
+                bgpdConnCmd,
+                shell=True,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE)
             #else:
             #    router.cmd("/usr/sbin/zebra -f conf/{0}-zebra.conf -d -i /tmp/{0}-zebra.pid > log/{0}-zebra.log 2>&1".format(router.name), shell=True)
             #    router.waitOutput()

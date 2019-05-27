@@ -38,11 +38,7 @@ def message_parser(line):
 counter = 0
 while True:
     try:
-        f.write('I am going to read a line...\n')
-        f.flush()
         line = stdin.readline().strip()
-        f.write('I got a line...\n')
-        f.flush()
         
         # When the parent dies we are seeing continual newlines, so we only access so many before stopping
         if line == "":
