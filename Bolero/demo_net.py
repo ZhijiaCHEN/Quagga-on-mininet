@@ -230,12 +230,12 @@ def genOspfdConf(topo):
 def genExaBGPConf(topo):
     conf = """
 process receive-bgp {{
-    run /usr/bin/python3 /home/zhijia/git/Quagga-on-mininet/Bolero/receive_bgp_message.py {logFile};
+    run /usr/bin/python3 {path}/receive_bgp_message.py {logFile};
     encoder json;
 }}
 
 process send-bgp {{
-    run /usr/bin/python3 /home/zhijia/git/Quagga-on-mininet/Bolero/send_bgp_message.py {route} {localAddress} {i};
+    run /usr/bin/python3 {path}/send_bgp_message.py {route} {localAddress} {i};
     encoder json;
 }}
 
@@ -274,7 +274,7 @@ neighbor {remoteAddress} {{
             remoteAS = topo.routerASDict[nRouter]
             remoteAddress = topo.intfIPDict[nIntf]
             f = open("conf/{}-exabgp.conf".format(localIntf), 'w')
-            f.write(conf.format(logFile=localIntf+"-bgp.log", remoteAddress=remoteAddress, localAddress=localAddress, localAS=localAS, remoteAS=remoteAS, route = "{}.0.0.0/16".format(100+localAS), i = i))
+            f.write(conf.format(logFile=localIntf+"-bgp.log", remoteAddress=remoteAddress, localAddress=localAddress, localAS=localAS, remoteAS=remoteAS, route = "{}.0.0.0/16".format(100+localAS), i = i, path=os.path.dirname(os.path.abspath(__file__))))
             f.close()
 
 def main():
